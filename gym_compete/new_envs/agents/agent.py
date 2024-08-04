@@ -38,6 +38,15 @@ class Agent(object):
         self._set_joint()
         if self.n_agents > 1:
             self._set_other_joint()
+
+        gid = self.env.geom_names.index('rightgoal')
+        self.RIGHT_GOAL = self.env.model.geom_pos[gid][0]
+        gid = self.env.geom_names.index('leftgoal')
+        self.LEFT_GOAL = self.env.model.geom_pos[gid][0]
+        if self.get_qpos()[0] > 0:
+            self.set_goal(self.LEFT_GOAL)
+        else:
+            self.set_goal(self.RIGHT_GOAL)
         self.set_observation_space()
         self.set_action_space()
 

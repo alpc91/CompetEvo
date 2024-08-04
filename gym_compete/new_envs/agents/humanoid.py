@@ -104,7 +104,7 @@ class Humanoid(Agent):
             [my_pos.flat, vel.flat,
              cinert.flat, cvel.flat,
              qfrc_actuator.flat, cfrc_ext.flat,
-             other_pos.flat]
+             other_pos.flat, np.array([self.GOAL,0])]
         )
         assert np.isfinite(obs).all(), "Humanoid observation is not finite!!"
         return obs
@@ -148,11 +148,13 @@ class Humanoid(Agent):
         self.observation_space = Box(low, high)
 
     def reached_goal(self):
-        if self.n_agents == 1: return False
-        xpos = self.get_body_com('torso')[0]
-        if self.GOAL > 0 and xpos > self.GOAL:
-            return True
-        elif self.GOAL < 0 and xpos < self.GOAL:
+        # if self.n_agents == 1: return False
+        # xpos = self.get_body_com('torso')[0]
+        # if self.GOAL > 0 and xpos > self.GOAL:
+        #     return True
+        # elif self.GOAL < 0 and xpos < self.GOAL:
+        #     return True
+        if self.dist_before < 1.0:
             return True
         return False
 

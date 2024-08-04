@@ -41,5 +41,5 @@ use_shadow_sample: False
 delta: 1.
 
 use_exploration_curriculum: True
-termination_epoch: 200
+termination_epoch: 1000
 use_parse_reward: True

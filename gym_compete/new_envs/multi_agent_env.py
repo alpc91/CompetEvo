@@ -123,19 +123,19 @@ class MultiAgentEnv(MujocoEnv):
         print("Created Scene with agents")
         for i, agent in self.agents.items():
             agent.set_env(self.env_scene)
-        self._set_observation_space()
-        self._set_action_space()
         self.metadata = self.env_scene.metadata
         self.move_reward_weight = move_reward_weight
-        gid = self.env_scene.geom_names.index('rightgoal')
-        self.RIGHT_GOAL = self.env_scene.model.geom_pos[gid][0]
-        gid = self.env_scene.geom_names.index('leftgoal')
-        self.LEFT_GOAL = self.env_scene.model.geom_pos[gid][0]
-        for i in range(self.n_agents):
-            if self.agents[i].get_qpos()[0] > 0:
-                self.agents[i].set_goal(self.LEFT_GOAL)
-            else:
-                self.agents[i].set_goal(self.RIGHT_GOAL)
+        # gid = self.env_scene.geom_names.index('rightgoal')
+        # self.RIGHT_GOAL = self.env_scene.model.geom_pos[gid][0]
+        # gid = self.env_scene.geom_names.index('leftgoal')
+        # self.LEFT_GOAL = self.env_scene.model.geom_pos[gid][0]
+        # for i in range(self.n_agents):
+        #     if self.agents[i].get_qpos()[0] > 0:
+        #         self.agents[i].set_goal(self.LEFT_GOAL)
+        #     else:
+        #         self.agents[i].set_goal(self.RIGHT_GOAL)
+        self._set_observation_space()
+        self._set_action_space()
 
     def _past_limit(self):
         if self._max_episode_steps <= self._elapsed_steps:
