@@ -110,6 +110,7 @@ class MultiAgentEnv(MujocoEnv):
         #         outpath=scene_xml_path,
         #         ini_pos=init_pos, ini_euler=ini_euler, rgb=rgb
         #     )
+        # ini_euler = [(0, 0, np.rad2deg(self.np_random.uniform(low=-np.pi, high=np.pi)))]
         print("Creating Scene XML")
         _, self._env_xml_path = create_multiagent_xml(
             world_xml_path, all_agent_xml_paths, agent_scopes,
@@ -240,7 +241,7 @@ class MultiAgentEnv(MujocoEnv):
         return self.env_scene.state_vector()
 
     def reset_model(self):
-        _ = self.env_scene.reset()
+        # _ = self.env_scene.reset()
         for i in range(self.n_agents):
             self.agents[i].reset_agent()
         return self._get_obs(), {}

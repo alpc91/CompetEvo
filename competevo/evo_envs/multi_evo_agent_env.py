@@ -27,7 +27,7 @@ class MultiEvoAgentEnv(MujocoEnv):
         # ),
     }
     WORLD_XML = os.path.join(os.path.dirname(__file__), "assets", "world_body.xml")
-    GOAL_REWARD = 1000
+    GOAL_REWARD = 10000
 
     def __init__(
         self, 
@@ -218,9 +218,12 @@ class MultiEvoAgentEnv(MujocoEnv):
                 goal_rews[i] = - self.GOAL_REWARD
         return goal_rews, True
 
-    def _get_done(self, dones, game_done):
+    def _get_done(self, dones, game_done, deads):
+        done = np.all(deads)
         # done = np.all(dones)
-        done = np.any(dones)
+        no_dead = not np.any(deads)
+        if no_dead:
+            done = np.any(dones)
         done = game_done or not np.isfinite(self.state_vector()).all() or done
         dones = tuple(done for _ in range(self.n_agents))
         return dones
@@ -234,10 +237,12 @@ class MultiEvoAgentEnv(MujocoEnv):
         move_rews = []
         infos = []
         dones = []
+        deads = []
         for i in range(self.n_agents):
             move_r, agent_done, rinfo = self.agents[i].after_step(actions[i])
             move_rews.append(move_r)
             dones.append(agent_done)
+            deads.append(rinfo['dead'])
             rinfo['agent_done'] = agent_done
             infos.append(rinfo)
         if self.cfg.use_parse_reward:
@@ -250,7 +255,7 @@ class MultiEvoAgentEnv(MujocoEnv):
             info['reward_parse'] = float(goal_rews[i])
             rews.append(float(goal_rews[i] + self.move_reward_weight * move_rews[i]))
         rews = tuple(rews)
-        terminateds = self._get_done(dones, game_done)
+        terminateds = self._get_done(dones, game_done, deads)
         infos = tuple(infos)
         obses = self._get_obs()
         

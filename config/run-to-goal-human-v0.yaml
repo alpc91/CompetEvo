@@ -1,5 +1,7 @@
 env_name: run-to-goal-human-v0
-  
+
+runner_type: multi-agent-runner 
+
 # training parameters
 gamma: 0.995
 tau: 0.95
@@ -37,5 +39,7 @@ use_reward_scaling: False
 use_opponent_sample: False
 use_shadow_sample: False
 delta: 1.
-use_exploration_curriculum: False
+
+use_exploration_curriculum: True
 termination_epoch: 200
+use_parse_reward: True

@@ -100,11 +100,12 @@ class EvoAnt(Ant):
         #     np.square(np.clip(cfrc_ext, -1, 1))
         # )
     
-        ctrl_cost = 1e-4 * np.square(action).mean()
+        # ctrl_cost = 1e-4 * np.square(action).mean()
+        ctrl_cost = 1e-2 * np.square(action).sum()
         contact_cost = 0
 
-        survive = 0
-        reward = forward_reward - ctrl_cost - contact_cost + survive
+        survive = 1.0
+        reward = 10*forward_reward - ctrl_cost - contact_cost + survive
 
         reward_info = dict()
         reward_info['reward_forward'] = forward_reward
@@ -129,7 +130,7 @@ class EvoAnt(Ant):
 
         # terminated = not (np.isfinite(self.get_qpos()).all() and np.isfinite(self.get_qvel()).all() and (height > min_height) and (height < max_height) and (abs(ang) < np.deg2rad(max_ang)))
         terminated = not (np.isfinite(self.get_qpos()).all() and np.isfinite(self.get_qvel()).all() and (height > min_height) and (height < max_height))
-        
+        info['dead'] = (height <= min_height) 
         return reward, terminated, info
 
 

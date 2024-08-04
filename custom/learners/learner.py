@@ -101,6 +101,9 @@ class Learner:
             # should not input averaged reward because the shadow 
             # agent's averaged reward is always less than best_reward
             return
+        
+        if 'epoch' in model:
+            self.epoch = model['epoch']
         self.best_reward = model.get('best_reward', self.best_reward)
 
     ###################################################################################

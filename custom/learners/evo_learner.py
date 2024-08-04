@@ -73,7 +73,7 @@ class EvoLearner:
         self.loss_iter = model['loss_iter']
 
         if 'epoch' in model:
-            epoch = model['epoch']
+            self.epoch = model['epoch']
         
         if self.is_shadow:
             # should not input averaged reward because the shadow

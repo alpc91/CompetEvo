@@ -217,6 +217,8 @@ class Agent(object):
         '''
         left_part = self.env.data.qpos[:self.qpos_start_idx]
         right_part = self.env.data.qpos[self.qpos_end_idx:]
+        left_part = left_part[:3]
+        right_part = right_part[:3]
         return np.concatenate((left_part, right_part), axis=0)
 
     def get_qvel(self):

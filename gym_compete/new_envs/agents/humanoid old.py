@@ -9,7 +9,7 @@ def mass_center(mass, xpos):
     # It should keep the same dimension when array broadcast.
     # Modified by git @KJaebye.
     mass = mass[:, np.newaxis]
-    return (np.sum(mass * xpos, 0) / np.sum(mass))[:2]
+    return (np.sum(mass * xpos, 0) / np.sum(mass))[0]
 
 
 class Humanoid(Agent):
@@ -26,49 +26,23 @@ class Humanoid(Agent):
         if self.get_qpos()[0] > 0:
             self.move_left = True
 
-    def quat2euler(self, quat):
-        w, x, y, z = quat
-        t0 = +2.0 * (w * x + y * z)
-        t1 = +1.0 - 2.0 * (x * x + y * y)
-        X = np.arctan2(t0, t1)
-        t2 = +2.0 * (w * y - z * x)
-        t2 = np.clip(t2, -1, 1)
-        Y = np.arcsin(t2)
-        t3 = +2.0 * (w * z + x * y)
-        t4 = +1.0 - 2.0 * (y * y + z * z)
-        Z = np.arctan2(t3, t4)
-        return np.array([X, Y, Z])
-
     def before_step(self):
         self._pos_before = mass_center(self.get_body_mass(), self.get_xipos())
 
-        torso_quat = self.env.data.qpos[3:7]
-        self.torso_euler = self.quat2euler(torso_quat)
-        #degree
-        # self.torso_euler = np.rad2deg(self.torso_euler)
-        # print("Torso Euler:", self.torso_euler)
-        # self.heading = [np.cos(self.torso_euler[2]), np.sin(self.torso_euler[2])]
-        self.dist_before = np.linalg.norm(np.array([self.GOAL,0])-self._pos_before)
-
     def after_step(self, action):
         pos_after = mass_center(self.get_body_mass(), self.get_xipos())
-        # forward_reward = 1.25 * (pos_after - self._pos_before) / self.env.model.opt.timestep
+        forward_reward = 1.25 * (pos_after - self._pos_before) / self.env.model.opt.timestep
         # forward_reward = .25 * (pos_after - self._pos_before) / self.env.model.opt.timestep
-        heading = np.array([np.cos(self.torso_euler[2]), np.sin(self.torso_euler[2])])
-        forward_reward = 1.25 * np.dot(heading, pos_after - self._pos_before) / self.env.model.opt.timestep
 
-        dist_after = np.linalg.norm(np.array([self.GOAL,0])-pos_after)
-        dist_reward = (self.dist_before - dist_after) / self.env.model.opt.timestep
-
-        # if self.move_left:
-        #     forward_reward *= -1
+        if self.move_left:
+            forward_reward *= -1
         ctrl_cost = .1 * np.square(action).sum()
         cfrc_ext = self.get_cfrc_ext()
         contact_cost = .5e-6 * np.square(cfrc_ext).sum()
         contact_cost = min(contact_cost, 10)
         qpos = self.get_qpos()
         survive = 5.0
-        reward = forward_reward - ctrl_cost - contact_cost + survive + dist_reward
+        reward = forward_reward - ctrl_cost - contact_cost + survive
 
         # reward_goal = - np.abs(qpos[0].item() - self.GOAL)
         # reward += reward_goal
@@ -80,7 +54,7 @@ class Humanoid(Agent):
         reward_info['reward_survive'] = survive
         # if self.team == 'walker':
         #     reward_info['reward_goal_dist'] = reward_goal
-        reward_info['reward_dense'] = reward
+        reward_info['reward_move'] = reward
 
         # done = not agent_standing
         terminated = bool(qpos[2] < 1. or qpos[2] > 2.)

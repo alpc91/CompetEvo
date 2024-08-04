@@ -80,7 +80,7 @@ class MultiAgentRunner(BaseRunner):
         t0 = time.time()
 
         """sampling data"""
-        batches, logs, _ = self.sample(self.cfg.min_batch_size)
+        batches, logs, t_win_rate = self.sample(self.cfg.min_batch_size)
         t1 = time.time()
         self.logger.info(
             "Sampling {} steps by {} slaves, spending {:.2f} s.".format(
@@ -98,12 +98,13 @@ class MultiAgentRunner(BaseRunner):
         self.logger.info("Policy update, spending: {:.2f} s.".format(t2-t1))
 
         """evaluate policy"""
-        _, log_evals, win_rate = self.sample(self.cfg.eval_batch_size, mean_action=True, nthreads=10)
+        _, log_evals, win_rate = self.sample(self.cfg.eval_batch_size, mean_action=True, nthreads=10, eval=True)
         t3 = time.time()
         self.logger.info("Evaluation time: {:.2f} s.".format(t3-t2))
 
         info = {
             'logs': logs, 'log_evals': log_evals, 
+            't_win_rate': t_win_rate,
             'win_rate': win_rate,
             'policy_losses': policy_losses, 'value_losses': value_losses
         }
@@ -113,7 +114,7 @@ class MultiAgentRunner(BaseRunner):
     def log_optimize_policy(self, info):
         epoch = self.epoch
         cfg = self.cfg
-        logs, log_evals, win_rate, policy_losses, value_losses= info['logs'], info['log_evals'], info['win_rate'], info['policy_losses'], info['value_losses']
+        logs, log_evals, t_win_rate, win_rate,  policy_losses, value_losses= info['logs'], info['log_evals'], info['t_win_rate'], info['win_rate'], info['policy_losses'], info['value_losses']
         logger, writer = self.logger, self.writer
 
         # print("0:", log_evals[0].total_reward, log_evals[0].num_episodes, log_evals[0].avg_episode_reward)
@@ -122,10 +123,20 @@ class MultiAgentRunner(BaseRunner):
         # print("1:", logs[1].avg_episode_reward)
 
         for i, learner in self.learners.items():
-            logger.info("Agent_{} gets eval reward: {:.2f}.".format(i, log_evals[i].avg_episode_reward))
-            logger.info("Agent_{} gets win rate: {:.2f}.".format(i, win_rate[i]))
             logger.info("Agent_{} gets policy loss: {:.2f}.".format(i, policy_losses[i]))
             logger.info("Agent_{} gets value loss: {:.2f}.".format(i, value_losses[i]))
+
+            logger.info("Agent_{} gets train_num_episodes: {:.2f}.".format(i, logs[i].num_episodes))
+            logger.info("Agent_{} gets train_num_steps: {:.2f}.".format(i, logs[i].num_steps))
+            logger.info("Agent_{} gets train_avg_episode_len: {:.2f}.".format(i, logs[i].avg_episode_len))
+            logger.info("Agent_{} gets train_avg_episode_reward: {:.2f}.".format(i, logs[i].avg_episode_reward))
+            logger.info("Agent_{} gets train_win rate: {:.2f}.".format(i, t_win_rate[i]))
+
+            logger.info("Agent_{} gets eval_num_episodes: {:.2f}.".format(i, log_evals[i].num_episodes))
+            logger.info("Agent_{} gets eval_num_steps: {:.2f}.".format(i, log_evals[i].num_steps))
+            logger.info("Agent_{} gets eval eval_avg_episode_len: {:.2f}.".format(i, log_evals[i].avg_episode_len))
+            logger.info("Agent_{} gets eval eval_avg_episode_reward: {:.2f}.".format(i, log_evals[i].avg_episode_reward))
+            logger.info("Agent_{} gets eval_win rate: {:.2f}.".format(i, win_rate[i]))
             if log_evals[i].avg_episode_reward > learner.best_reward or win_rate[i] > learner.best_win_rate:
                 learner.best_reward = log_evals[i].avg_episode_reward
                 learner.best_win_rate = win_rate[i]
@@ -138,9 +149,35 @@ class MultiAgentRunner(BaseRunner):
             writer.add_scalar('eval_R_eps_avg_{}'.format(i), log_evals[i].avg_episode_reward, epoch)
             # writer.add_scalar('eval_R_avg_{}'.format(i), log_evals[i].avg_reward, epoch)
             # logging win rate
+            writer.add_scalar("train_win_rate_{}".format(i), t_win_rate[i], epoch)
+            # logging win rate
             writer.add_scalar("eval_win_rate_{}".format(i), win_rate[i], epoch)
+            # logging win rate
+            # writer.add_scalar("best_eval_win_rate_{}".format(i), b_win_rate[i], epoch)
+
+            # eps num_episodes
+            writer.add_scalar("train_num_episodes", logs[i].num_episodes, epoch)
+            # eps num_episodes
+            writer.add_scalar("eval_num_episodes", log_evals[i].num_episodes, epoch)
+            # eps num_episodes
+            # writer.add_scalar("best_eval_num_episodes", log_best_evals[i].num_episodes, epoch)
+
+            # eps num_episodes
+            writer.add_scalar("train_num_steps", logs[i].num_steps, epoch)
+            # eps num_episodes
+            writer.add_scalar("eval_num_steps", log_evals[i].num_steps, epoch)
+            # eps num_episodes
+            # writer.add_scalar("best_eval_num_steps", log_best_evals[i].num_steps, epoch)
+
+
             # eps len
-            writer.add_scalar("episode_length", log_evals[i].avg_episode_len, epoch)
+            writer.add_scalar("train_episode_length", logs[i].avg_episode_len, epoch)
+            # eps len
+            writer.add_scalar("eval_episode_length", log_evals[i].avg_episode_len, epoch)
+            # eps len
+            # writer.add_scalar("best_eval_episode_length", log_best_evals[i].avg_episode_len, epoch)
+
+
             # policy loss
             writer.add_scalar("policy_loss_{}".format(i), policy_losses[i], epoch)
             # value loss
@@ -177,7 +214,7 @@ class MultiAgentRunner(BaseRunner):
             c_rew.append(rew)
         return tuple(c_rew), infos
 
-    def sample_worker(self, pid, queue, min_batch_size, mean_action, render, randomstate, idx=None):
+    def sample_worker(self, pid, queue, min_batch_size, mean_action, render, randomstate, idx=None, eval=False):
         self.seed_worker(pid)
         
         # define multi-agent logger
@@ -199,7 +236,7 @@ class MultiAgentRunner(BaseRunner):
                 samplers[i].policy_net.load_state_dict(self.learners[i].policy_net.state_dict())
 
             # sample random opponent old policies before every rollout
-            if not self.cfg.use_opponent_sample or mean_action or self.epoch == 0:
+            if eval or self.agent_num<2 or self.epoch == 0: #not self.cfg.use_opponent_sample or mean_action 
                 ckpt = self.epoch
 
                 # try:
@@ -316,7 +353,7 @@ class MultiAgentRunner(BaseRunner):
         else:
             return ma_memory, ma_logger, total_score, ckpts
 
-    def sample(self, min_batch_size, mean_action=False, render=False, nthreads=None):
+    def sample(self, min_batch_size, mean_action=False, render=False, nthreads=None, eval=False):
         if nthreads is None:
             nthreads = self.num_threads
 
@@ -324,7 +361,7 @@ class MultiAgentRunner(BaseRunner):
         for i, learner in self.learners.items():
             to_test(*learner.sample_modules)
 
-        if (not self.cfg.use_opponent_sample) or mean_action:
+        if eval or self.agent_num<2:#(not self.cfg.use_opponent_sample) or mean_action:
             with to_cpu(*reduce(add, (learner.sample_modules for i, learner in self.learners.items()))):
                 with torch.no_grad():
                     thread_batch_size = int(math.floor(min_batch_size / nthreads))
@@ -336,10 +373,10 @@ class MultiAgentRunner(BaseRunner):
                     ckpts = [None] * nthreads
 
                     for i in range(nthreads-1):
-                        worker_args = (i+1, queue, thread_batch_size, mean_action, render, np.random.RandomState())
+                        worker_args = (i+1, queue, thread_batch_size, mean_action, render, np.random.RandomState(), None, eval)
                         worker = multiprocessing.Process(target=self.sample_worker, args=worker_args)
                         worker.start()
-                    memories[0], loggers[0], total_scores[0], ckpts[0] = self.sample_worker(0, None, thread_batch_size, mean_action, render, np.random.RandomState())
+                    memories[0], loggers[0], total_scores[0], ckpts[0] = self.sample_worker(0, None, thread_batch_size, mean_action, render, np.random.RandomState(), None, eval)
 
                     for i in range(nthreads - 1):
                         pid, worker_memory, worker_logger, total_score, ckpt = queue.get()
@@ -356,6 +393,11 @@ class MultiAgentRunner(BaseRunner):
                     total_scores = list(zip(*total_scores))
                     total_scores = [sum(scores) for scores in total_scores]
                     win_rate = [total_scores[0]/total_scores[-1], total_scores[1]/total_scores[-1]]
+
+                    if self.agent_num > 1:
+                        self.logger.info("total_scores: {}, {}, {}".format(total_scores[0],total_scores[1],total_scores[2]))
+                    else:
+                        self.logger.info("total_scores: {}, {}".format(total_scores[0],total_scores[1]))
                 
             for logger in ma_logger: logger.sample_time = time.time() - t_start
             return ma_buffer, ma_logger, win_rate
@@ -423,6 +465,8 @@ class MultiAgentRunner(BaseRunner):
                     total_scores_1 = list(zip(*total_scores_1))
                     total_scores_1 = [sum(scores) for scores in total_scores_1]
                     win_rate = [total_scores_0[0]/total_scores_0[-1], total_scores_1[1]/total_scores_1[-1]]
+                    self.logger.info("train total_scores_0: {}, {}, {}".format(total_scores_0[0],total_scores_0[1],total_scores_0[2]))
+                    self.logger.info("train total_scores_1: {}, {}, {}".format(total_scores_1[0],total_scores_1[1],total_scores_1[2]))
 
                     # extract corresponding agent data 
                     b = [ma_buffer_0[0], ma_buffer_1[1]]
@@ -444,11 +488,13 @@ class MultiAgentRunner(BaseRunner):
         else:
             assert isinstance(ckpt, str)
             cp_path = '%s/%s/%s.p' % (ckpt_dir, "agent_"+str(idx), ckpt)
-        self.logger.info('loading agent_%s model from checkpoint: %s' % (str(idx), cp_path))
         model_cp = pickle.load(open(cp_path, "rb"))
 
         # load model
         self.learners[idx].load_ckpt(model_cp)
+        self.logger.info('loading agent_%s model from checkpoint: %s' % (str(idx), cp_path))
+        self.logger.info('best reward: %f' % (self.learners[idx].best_reward))
+        self.logger.info('epoch: %f' % (self.learners[idx].epoch))
 
     def save_checkpoint(self, epoch):
         def save(cp_path, idx):
@@ -476,6 +522,7 @@ class MultiAgentRunner(BaseRunner):
     
     def display(self, num_episode=3, mean_action=True):
         total_score = [0 for _ in self.learners]
+        total_score.append(0)
         total_reward = []
         for _ in range(num_episode):
             episode_reward = [0 for _ in self.learners]
@@ -522,6 +569,7 @@ class MultiAgentRunner(BaseRunner):
                     masks = [0 for _ in self.learners]
                 
                 if terminateds[0] or truncated:
+                    total_score[-1] += 1
                     break
                 states = next_states
             
@@ -534,4 +582,7 @@ class MultiAgentRunner(BaseRunner):
 
         self.logger.info("Agent_0 gets averaged episode reward: {:.2f}".format(average(list(zip(*total_reward))[0])))
         self.logger.info("Agent_1 gets averaged episode reward: {:.2f}".format(average(list(zip(*total_reward))[1])))
+
+        self.logger.info("Agent_0 gets win rate over {} rounds: {:.2f}".format(num_episode, total_score[0]/total_score[-1]))
+        self.logger.info("Agent_1 gets win rate over {} rounds: {:.2f}".format(num_episode, total_score[1]/total_score[-1]))
         

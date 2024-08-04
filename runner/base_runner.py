@@ -6,6 +6,8 @@ import competevo
 import gym_compete
 import os
 import shutil
+import numpy as np
+from gymnasium.utils import seeding
 
 class BaseRunner:
     def __init__(self, cfg, logger, dtype, device, num_threads=1, training=True, ckpt_dir=None, ckpt=0) -> None:
@@ -95,6 +97,9 @@ class BaseRunner:
     def seed_worker(self, pid):
         if pid > 0:
             torch.manual_seed(torch.randint(0, 5000, (1,)) * pid)
+            np.random.seed(np.random.randint(5000) * pid)
+
             # if hasattr(self.env, 'np_random'):
-            #     self.env.np_random.seed(self.env.np_random.randint(5000) * pid)
+                # self.env.np_random.seed(self.env.np_random.randint(5000) * pid)
+            self.env.np_random, _ = seeding.np_random(np.random.randint(5000) * pid)
     
