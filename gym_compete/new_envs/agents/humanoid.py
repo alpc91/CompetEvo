@@ -48,7 +48,7 @@ class Humanoid(Agent):
         # self.torso_euler = np.rad2deg(self.torso_euler)
         # print("Torso Euler:", self.torso_euler)
         # self.heading = [np.cos(self.torso_euler[2]), np.sin(self.torso_euler[2])]
-        self.dist_before = np.linalg.norm(np.array([self.GOAL,0])-self._pos_before)
+        self.dist_before = np.linalg.norm(self.GOAL-self._pos_before)
 
     def after_step(self, action):
         pos_after = mass_center(self.get_body_mass(), self.get_xipos())
@@ -57,7 +57,7 @@ class Humanoid(Agent):
         heading = np.array([np.cos(self.torso_euler[2]), np.sin(self.torso_euler[2])])
         forward_reward = 1.25 * np.dot(heading, pos_after - self._pos_before) / self.env.model.opt.timestep
 
-        dist_after = np.linalg.norm(np.array([self.GOAL,0])-pos_after)
+        dist_after = np.linalg.norm(self.GOAL-pos_after)
         dist_reward = (self.dist_before - dist_after) / self.env.model.opt.timestep
 
         # if self.move_left:
@@ -68,7 +68,7 @@ class Humanoid(Agent):
         contact_cost = min(contact_cost, 10)
         qpos = self.get_qpos()
         survive = 5.0
-        reward = forward_reward - ctrl_cost - contact_cost + survive + dist_reward
+        reward = forward_reward - ctrl_cost - contact_cost + survive# + dist_reward
 
         # reward_goal = - np.abs(qpos[0].item() - self.GOAL)
         # reward += reward_goal
@@ -78,6 +78,7 @@ class Humanoid(Agent):
         reward_info['reward_ctrl'] = ctrl_cost
         reward_info['reward_contact'] = contact_cost
         reward_info['reward_survive'] = survive
+        reward_info['reward_dist'] = dist_reward
         # if self.team == 'walker':
         #     reward_info['reward_goal_dist'] = reward_goal
         reward_info['reward_dense'] = reward
@@ -104,7 +105,7 @@ class Humanoid(Agent):
             [my_pos.flat, vel.flat,
              cinert.flat, cvel.flat,
              qfrc_actuator.flat, cfrc_ext.flat,
-             other_pos.flat, np.array([self.GOAL,0])]
+             other_pos.flat, self.GOAL]
         )
         assert np.isfinite(obs).all(), "Humanoid observation is not finite!!"
         return obs
@@ -159,10 +160,11 @@ class Humanoid(Agent):
         return False
 
     def reset_agent(self):
-        xpos = self.get_qpos()[0]
-        if xpos * self.GOAL > 0 :
-            self.set_goal(-self.GOAL)
-        if xpos > 0:
-            self.move_left = True
-        else:
-            self.move_left = False
+        if self.n_agents > 1:
+            xpos = self.get_qpos()[0]
+            if xpos * self.GOAL > 0 :
+                self.set_goal(-self.GOAL)
+            if xpos > 0:
+                self.move_left = True
+            else:
+                self.move_left = False

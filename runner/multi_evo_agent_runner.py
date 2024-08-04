@@ -651,8 +651,9 @@ class MultiEvoAgentRunner(BaseRunner):
             return total / length
 
         self.logger.info("Agent_0 gets averaged episode reward: {:.2f}".format(average(list(zip(*total_reward))[0])))
-        self.logger.info("Agent_1 gets averaged episode reward: {:.2f}".format(average(list(zip(*total_reward))[1])))
-
         self.logger.info("Agent_0 gets win rate over {} rounds: {:.2f}".format(num_episode, total_score[0]/total_score[-1]))
-        self.logger.info("Agent_1 gets win rate over {} rounds: {:.2f}".format(num_episode, total_score[1]/total_score[-1]))
+
+        if self.agent_num > 1:
+            self.logger.info("Agent_1 gets averaged episode reward: {:.2f}".format(average(list(zip(*total_reward))[1])))
+            self.logger.info("Agent_1 gets win rate over {} rounds: {:.2f}".format(num_episode, total_score[1]/total_score[-1]))
         

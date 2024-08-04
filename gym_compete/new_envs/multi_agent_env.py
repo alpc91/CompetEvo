@@ -156,18 +156,18 @@ class MultiAgentEnv(MujocoEnv):
         touchdowns = [self.agents[i].reached_goal()
                       for i in range(self.n_agents)]
         num_reached_goal = sum(touchdowns)
-        goal_rews = [0. for _ in range(self.n_agents)]
+        goal_rews = [infos[i]['reward_dist'] for i in range(self.n_agents)]
 
         if num_reached_goal != 1:
             return goal_rews, num_reached_goal > 0
         
         for i in range(self.n_agents):
             if touchdowns[i]:
-                goal_rews[i] = self.GOAL_REWARD
+                goal_rews[i] += self.GOAL_REWARD
                 if infos:
                     infos[i]['winner'] = True
             else:
-                goal_rews[i] = - self.GOAL_REWARD
+                goal_rews[i] += - self.GOAL_REWARD
         return goal_rews, True
 
     def _get_done(self, dones, game_done):
