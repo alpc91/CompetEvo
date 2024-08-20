@@ -54,6 +54,7 @@ def create_multiagent_xml_str(
         ini_pos=None, 
         ini_euler=None,
         rgb=None,
+        symmetric=False,
     ):
     world = ET.parse(world_xml)
     world_root = world.getroot()
@@ -61,8 +62,10 @@ def create_multiagent_xml_str(
     world_body = world_root.find('worldbody')
     goal_pos_r = np.random.uniform(5, 10)
     goal_pos_theta = np.random.uniform(0, 2*np.pi)
-    goal_pos = (goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0)
-    goal_pos = (-10,0,0)
+    if symmetric:
+        goal_pos = (goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0)
+    else:
+        goal_pos = (-10,0,0)
     for child in list(world_body):
         if child.tag == 'geom' and child.get('name') == 'goal':
             child.set('pos', tuple_to_str(goal_pos))
@@ -113,10 +116,13 @@ def create_multiagent_xml_str(
         if agent_body.get('euler'):
             orieuler = list(map(float, agent_body.get('euler').strip().split(" ")))
             # keep original y and z coordinates
-            euler = list(ini_euler[i])
 
-            # yaw = np.random.uniform(low=-np.pi, high=np.pi)/np.pi*180
-            # euler = list((0, 0, yaw))
+            if symmetric:
+                yaw = np.random.uniform(low=-np.pi, high=np.pi)/np.pi*180
+                euler = list((0, 0, yaw))
+            else:
+                euler = list(ini_euler[i])
+
             # euler[1] = orieuler[1]
             # euler[2] = orieuler[2]
             # print(tuple_to_str(euler))

@@ -170,7 +170,7 @@ class MultiEvoAgentEnv(MujocoEnv):
 
         self._env_xml_str = create_multiagent_xml_str(
             world_xml_path, all_agent_xml_strs, agent_scopes,
-            ini_pos=init_pos, ini_euler=ini_euler, rgb=rgb
+            ini_pos=init_pos, ini_euler=ini_euler, rgb=rgb, symmetric=getattr(self.cfg, 'symmetric', True)
         )
         # print(self._env_xml_str)
         self.env_scene = MultiEvoAgentScene(self._env_xml_str, self.n_agents, **kwargs,)
