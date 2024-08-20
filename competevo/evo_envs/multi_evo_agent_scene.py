@@ -284,7 +284,31 @@ class MultiEvoAgentScene(NewMujocoEnv):
         ])
         return obs
 
+    def euler2quat(self, roll, pitch, yaw):
+        """
+        Convert Euler angles to quaternion.
+        Roll, pitch, yaw are in radians.
+        """
+        cy = np.cos(yaw * 0.5)
+        sy = np.sin(yaw * 0.5)
+        cp = np.cos(pitch * 0.5)
+        sp = np.sin(pitch * 0.5)
+        cr = np.cos(roll * 0.5)
+        sr = np.sin(roll * 0.5)
+
+        w = cr * cp * cy + sr * sp * sy
+        x = sr * cp * cy - cr * sp * sy
+        y = cr * sp * cy + sr * cp * sy
+        z = cr * cp * sy - sr * sp * cy
+
+        return np.array([w, x, y, z])
+
     def reset_model(self):
+        yaw = self.np_random.uniform(low=-np.pi, high=np.pi)
+        init_euler = (0, 0, yaw)
+        init_quat = self.euler2quat(*init_euler)
+        self.init_qpos[:2] = [0, 0] 
+        self.init_qpos[3:7] = init_quat
         qpos = self.init_qpos + self.np_random.uniform(size=self.model.nq, low=-.1, high=.1)
         qvel = self.init_qvel + self.np_random.integers(self.model.nv) * .1
         self.set_state(qpos, qvel)
