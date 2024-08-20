@@ -10,6 +10,22 @@ register(
             'world_xml_path': "./competevo/evo_envs/assets/world_body_arena.xml",
             'init_pos': [(-1, 0, 1.5), (1, 0, 1.5)],
             'ini_euler': [(0, 0, 0), (0, 0, 180)],
+            'rgb': [(0.98, 0.54, 0.56), (0.11, 0.56, 1)],
+            # 'rgb': [(0.98, 0.87, 0.67), (0.98, 0.87, 0.67)],
+            'max_episode_steps': 500,
+            'min_radius': 2.5,
+            'max_radius': 4.5,
+            },
+)
+
+register(
+    id='robo-sumo-evoants-v0',
+    entry_point='competevo.evo_envs:MultiEvoAgentEnv',
+    disable_env_checker=True,
+    kwargs={'agent_names': ['dev_ant_fighter', 'dev_ant_fighter'],
+            'world_xml_path': "./competevo/evo_envs/assets/world_body_arena.xml",
+            'init_pos': [(-1, 0, 1.5), (1, 0, 1.5)],
+            'ini_euler': [(0, 0, 0), (0, 0, 180)],
             # 'rgb': [(0.98, 0.54, 0.56), (0.11, 0.56, 1)],
             'rgb': [(0.98, 0.87, 0.67), (0.98, 0.87, 0.67)],
             'max_episode_steps': 500,
@@ -116,8 +132,8 @@ register(
     kwargs={'agent_names': ['dev_bug', 'dev_bug'],
             'init_pos': [(-1, 0, 0.75), (1, 0, 0.75)],
             'ini_euler': [(0, 0, 0), (0, 0, 180)],
-            # 'rgb': [(0.98, 0.54, 0.56), (0.11, 0.56, 1)],
-            'rgb': [(0.98, 0.87, 0.67), (0.98, 0.87, 0.67)],
+            'rgb': [(0.98, 0.54, 0.56), (0.11, 0.56, 1)],
+            # 'rgb': [(0.98, 0.87, 0.67), (0.98, 0.87, 0.67)],
             'max_episode_steps': 500,
             },
 )
