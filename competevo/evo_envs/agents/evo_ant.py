@@ -43,7 +43,7 @@ class EvoAnt(Ant):
         self.attr_specs = set(cfg.obs_specs.get('attr', []))
         self.control_action_dim = 1
         self.skel_num_action = 3 if cfg.enable_remove else 2
-        self.sim_obs_dim = 15 #13
+        self.sim_obs_dim = 15+2 #13
         self.attr_fixed_dim = self.get_attr_fixed().shape[-1]
 
         self.state_dim = self.attr_fixed_dim + self.sim_obs_dim + self.attr_design_dim
@@ -290,6 +290,7 @@ class EvoAnt(Ant):
                 offset = self.data.body_xpos[self.model._body_name2id[body.name]][[0, 2]] - root_pos[[0, 2]]
                 obs_i.append(offset)
             
+            obs_i.append(self.GOAL)
             obs_i = np.concatenate(obs_i)
             obs.append(obs_i)
             # print(i, obs_i.shape)
