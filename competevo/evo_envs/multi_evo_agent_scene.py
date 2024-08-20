@@ -304,11 +304,11 @@ class MultiEvoAgentScene(NewMujocoEnv):
         return np.array([w, x, y, z])
 
     def reset_model(self):
-        yaw = self.np_random.uniform(low=-np.pi, high=np.pi)
-        init_euler = (0, 0, yaw)
-        init_quat = self.euler2quat(*init_euler)
-        self.init_qpos[:2] = [0, 0] 
-        self.init_qpos[3:7] = init_quat
+        # yaw = self.np_random.uniform(low=-np.pi, high=np.pi)
+        # init_euler = (0, 0, yaw)
+        # init_quat = self.euler2quat(*init_euler)
+        # self.init_qpos[:2] = [0, 0] 
+        # self.init_qpos[3:7] = init_quat
         qpos = self.init_qpos + self.np_random.uniform(size=self.model.nq, low=-.1, high=.1)
         qvel = self.init_qvel + self.np_random.integers(self.model.nv) * .1
         self.set_state(qpos, qvel)

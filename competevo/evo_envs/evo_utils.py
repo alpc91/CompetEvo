@@ -59,6 +59,18 @@ def create_multiagent_xml_str(
     world_root = world.getroot()
     world_default = world_root.find('default')
     world_body = world_root.find('worldbody')
+    goal_pos_r = np.random.uniform(5, 10)
+    goal_pos_theta = np.random.uniform(0, 2*np.pi)
+    goal_pos = (goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0)
+    goal_pos = (-10,0,0)
+    for child in list(world_body):
+        if child.tag == 'geom' and child.get('name') == 'goal':
+            child.set('pos', tuple_to_str(goal_pos))
+        # elif child.tag == 'geom' and child.get('name') == 'rightgoal':
+        #     child.set('visible', 'False')
+        # elif child.tag == 'geom' and child.get('name') == 'leftgoal':
+        #     child.set('visible', 'False')
+
     world_actuator = None
     world_tendons = None
     n_agents = len(all_agent_xml_strs)
@@ -102,6 +114,9 @@ def create_multiagent_xml_str(
             orieuler = list(map(float, agent_body.get('euler').strip().split(" ")))
             # keep original y and z coordinates
             euler = list(ini_euler[i])
+
+            # yaw = np.random.uniform(low=-np.pi, high=np.pi)/np.pi*180
+            # euler = list((0, 0, yaw))
             # euler[1] = orieuler[1]
             # euler[2] = orieuler[2]
             # print(tuple_to_str(euler))

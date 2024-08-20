@@ -112,15 +112,18 @@ class MultiEvoAgentEnv(MujocoEnv):
         self._set_action_space()
         self.metadata = self.env_scene.metadata
         
-        gid = self.env_scene.geom_names.index('rightgoal')
-        self.RIGHT_GOAL = self.env_scene.model.geom_pos[gid][0]
-        gid = self.env_scene.geom_names.index('leftgoal')
-        self.LEFT_GOAL = self.env_scene.model.geom_pos[gid][0]
+        # gid = self.env_scene.geom_names.index('rightgoal')
+        # self.RIGHT_GOAL = self.env_scene.model.geom_pos[gid][0]
+        # gid = self.env_scene.geom_names.index('leftgoal')
+        # self.LEFT_GOAL = self.env_scene.model.geom_pos[gid][0]
         for i in range(self.n_agents):
-            if self.agents[i].get_qpos()[0] > 0:
-                self.agents[i].set_goal(self.LEFT_GOAL)
-            else:
-                self.agents[i].set_goal(self.RIGHT_GOAL)
+            gid = self.env_scene.geom_names.index('goal')
+            self.GOAL = self.env_scene.model.geom_pos[gid][:2]
+            self.agents[i].set_goal(self.GOAL)
+            # if self.agents[i].get_qpos()[0] > 0:
+            #     self.agents[i].set_goal(self.LEFT_GOAL)
+            # else:
+            #     self.agents[i].set_goal(self.RIGHT_GOAL)
 
     def reload_init_mujoco_env(self, **kwargs):
         if hasattr(self, "env_scene"):
@@ -134,15 +137,21 @@ class MultiEvoAgentEnv(MujocoEnv):
         self._set_action_space()
         self.metadata = self.env_scene.metadata
         
-        gid = self.env_scene.geom_names.index('rightgoal')
-        self.RIGHT_GOAL = self.env_scene.model.geom_pos[gid][0]
-        gid = self.env_scene.geom_names.index('leftgoal')
-        self.LEFT_GOAL = self.env_scene.model.geom_pos[gid][0]
+
         for i in range(self.n_agents):
-            if self.agents[i].get_qpos()[0] > 0:
-                self.agents[i].set_goal(self.LEFT_GOAL)
-            else:
-                self.agents[i].set_goal(self.RIGHT_GOAL)
+            gid = self.env_scene.geom_names.index('goal')
+            self.GOAL = self.env_scene.model.geom_pos[gid][:2]
+            self.agents[i].set_goal(self.GOAL)
+
+        # gid = self.env_scene.geom_names.index('rightgoal')
+        # self.RIGHT_GOAL = self.env_scene.model.geom_pos[gid][0]
+        # gid = self.env_scene.geom_names.index('leftgoal')
+        # self.LEFT_GOAL = self.env_scene.model.geom_pos[gid][0]
+        # for i in range(self.n_agents):
+        #     if self.agents[i].get_qpos()[0] > 0:
+        #         self.agents[i].set_goal(self.LEFT_GOAL)
+        #     else:
+        #         self.agents[i].set_goal(self.RIGHT_GOAL)
 
     def load_tmp_mujoco_env(
             self, 
@@ -171,16 +180,22 @@ class MultiEvoAgentEnv(MujocoEnv):
         self._set_observation_space()
         self._set_action_space()
         self.metadata = self.env_scene.metadata
-        
-        gid = self.env_scene.geom_names.index('rightgoal')
-        self.RIGHT_GOAL = self.env_scene.model.geom_pos[gid][0]
-        gid = self.env_scene.geom_names.index('leftgoal')
-        self.LEFT_GOAL = self.env_scene.model.geom_pos[gid][0]
+
+
         for i in range(self.n_agents):
-            if self.agents[i].get_qpos()[0] > 0:
-                self.agents[i].set_goal(self.LEFT_GOAL)
-            else:
-                self.agents[i].set_goal(self.RIGHT_GOAL)
+            gid = self.env_scene.geom_names.index('goal')
+            self.GOAL = self.env_scene.model.geom_pos[gid][:2]
+            self.agents[i].set_goal(self.GOAL)
+        
+        # gid = self.env_scene.geom_names.index('rightgoal')
+        # self.RIGHT_GOAL = self.env_scene.model.geom_pos[gid][0]
+        # gid = self.env_scene.geom_names.index('leftgoal')
+        # self.LEFT_GOAL = self.env_scene.model.geom_pos[gid][0]
+        # for i in range(self.n_agents):
+        #     if self.agents[i].get_qpos()[0] > 0:
+        #         self.agents[i].set_goal(self.LEFT_GOAL)
+        #     else:
+        #         self.agents[i].set_goal(self.RIGHT_GOAL)
 
     def _past_limit(self):
         if self._max_episode_steps <= self._elapsed_steps:
@@ -261,6 +276,7 @@ class MultiEvoAgentEnv(MujocoEnv):
         
         return obses, rews, terminateds, False, infos
 
+
     def step(self, actions):
         self.cur_t += 1
         # skeleton transform stage
@@ -282,6 +298,10 @@ class MultiEvoAgentEnv(MujocoEnv):
                 cur_xml_strs.append(cur_xml_str)
             
             try:
+                # yaw = self.np_random.uniform(low=-np.pi, high=np.pi)/np.pi*180
+                # self.ini_euler = [(0, 0, yaw)]
+                # self.ini_pos = [(self.np_random.uniform(low=-2, high=2), self.np_random.uniform(low=-2, high=2),self.ini_pos[0][2])] 
+                
                 self.load_tmp_mujoco_env(self.world_xml_path, cur_xml_strs, \
                                      self.agent_scopes, self.ini_pos, self.ini_euler, self.rgb, **self.kwargs)
                 # print(self._env_xml_str)
@@ -319,6 +339,10 @@ class MultiEvoAgentEnv(MujocoEnv):
                 cur_xml_strs.append(cur_xml_str)
 
             try:
+                # yaw = self.np_random.uniform(low=-np.pi, high=np.pi)/np.pi*180
+                # self.ini_euler = [(0, 0, yaw)]
+                # self.ini_pos = [(self.np_random.uniform(low=-2, high=2), self.np_random.uniform(low=-2, high=2),self.ini_pos[0][2])] 
+                
                 self.load_tmp_mujoco_env(self.world_xml_path, cur_xml_strs, \
                                      self.agent_scopes, self.ini_pos, self.ini_euler, self.rgb, **self.kwargs)
                 # print(self._env_xml_str)

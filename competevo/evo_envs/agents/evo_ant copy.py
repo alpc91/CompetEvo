@@ -55,14 +55,12 @@ class EvoAnt(Ant):
 
     def set_goal(self, goal):
         self.GOAL = goal
-        # self.move_left = False
-        # if self.get_qpos()[0] > 0:
-        #     self.move_left = True
+        self.move_left = False
+        if self.get_qpos()[0] > 0:
+            self.move_left = True
 
     def before_step(self):
-        self._xposbefore = self.get_body_com("0")[:2]
-
-        self.dist_before = np.linalg.norm(self.GOAL-self._xposbefore)
+        self._xposbefore = self.get_body_com("0")[0]
 
     # def after_step(self, action):
     #     xposafter = self.get_body_com("0")[0]
@@ -91,12 +89,10 @@ class EvoAnt(Ant):
     #     return reward, terminated, reward_info
 
     def after_step(self, action):
-        xposafter = self.get_body_com("0")[:2]
-        # forward_reward = (xposafter - self._xposbefore) / self.env.dt
-        dist_after = np.linalg.norm(self.GOAL-xposafter)
-        forward_reward = (self.dist_before - dist_after) / self.env.dt
-        # if self.move_left:
-        #     forward_reward *= -1
+        xposafter = self.get_body_com("0")[0]
+        forward_reward = (xposafter - self._xposbefore) / self.env.dt
+        if self.move_left:
+            forward_reward *= -1
         
         # ctrl_cost = .5 * np.square(action).sum()
         # cfrc_ext = self.get_cfrc_ext()
@@ -177,13 +173,12 @@ class EvoAnt(Ant):
 
     def reset_agent(self):
         xpos = self.get_qpos()[0]
-        self.set_goal(self.GOAL)
-        # if xpos * self.GOAL > 0 :
-        #     self.set_goal(-self.GOAL)
-        # if xpos > 0:
-        #     self.move_left = True
-        # else:
-        #     self.move_left = False
+        if xpos * self.GOAL > 0 :
+            self.set_goal(-self.GOAL)
+        if xpos > 0:
+            self.move_left = True
+        else:
+            self.move_left = False
 
     ############################################################################
     ############################# robot xml ####################################
