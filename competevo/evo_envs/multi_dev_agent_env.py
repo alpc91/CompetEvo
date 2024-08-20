@@ -16,12 +16,12 @@ class MultiDevAgentEnv(MujocoEnv):
     '''
     AGENT_MAP = {
         'dev_ant': (
-            os.path.join(os.path.dirname(__file__), "assets", "evo_ant_body_base2.xml"),
+            os.path.join(os.path.dirname(__file__), "assets", "evo_ant_body_base.xml"),
             # os.path.join(os.path.dirname(__file__), "assets", "evo_ant_body_base.xml"),
             DevAnt
         ),
         'dev_ant_fighter': (
-            os.path.join(os.path.dirname(__file__), "assets", "evo_ant_body_base2.xml"),
+            os.path.join(os.path.dirname(__file__), "assets", "evo_ant_body_base.xml"),
             DevAntFighter
         ),
         'dev_bug':(
