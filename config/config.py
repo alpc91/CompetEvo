@@ -75,6 +75,8 @@ class Config:
 
         self.use_parse_reward = cfg.get("use_parse_reward", True)
 
+        self.symmetric = cfg.get("symmetric", False)
+
         # competition config
         self.use_opponent_sample = cfg.get('use_opponent_sample', False)
         self.use_shadow_sample = cfg.get('use_shadow_sample', False)
