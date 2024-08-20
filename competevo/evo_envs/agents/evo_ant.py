@@ -59,10 +59,26 @@ class EvoAnt(Ant):
         # if self.get_qpos()[0] > 0:
         #     self.move_left = True
 
+    def quat2euler(self, quat):
+        w, x, y, z = quat
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        X = np.arctan2(t0, t1)
+        t2 = +2.0 * (w * y - z * x)
+        t2 = np.clip(t2, -1, 1)
+        Y = np.arcsin(t2)
+        t3 = +2.0 * (w * z + x * y)
+        t4 = +1.0 - 2.0 * (y * y + z * z)
+        Z = np.arctan2(t3, t4)
+        return np.array([X, Y, Z])
+    
     def before_step(self):
         self._xposbefore = self.get_body_com("0")[:2]
 
         self.dist_before = np.linalg.norm(self.GOAL-self._xposbefore)
+
+        torso_quat = self.env.data.qpos[3:7]
+        self.torso_euler = self.quat2euler(torso_quat)
 
     # def after_step(self, action):
     #     xposafter = self.get_body_com("0")[0]
@@ -94,7 +110,11 @@ class EvoAnt(Ant):
         xposafter = self.get_body_com("0")[:2]
         # forward_reward = (xposafter - self._xposbefore) / self.env.dt
         dist_after = np.linalg.norm(self.GOAL-xposafter)
-        forward_reward = (self.dist_before - dist_after) / self.env.dt
+        dist_reward = (self.dist_before - dist_after) / self.env.dt
+
+
+        heading = np.array([np.cos(self.torso_euler[2]), np.sin(self.torso_euler[2])])
+        forward_reward =  np.dot(heading, xposafter - self._xposbefore) / self.env.dt
         # if self.move_left:
         #     forward_reward *= -1
         
@@ -109,9 +129,10 @@ class EvoAnt(Ant):
         contact_cost = 0
 
         survive = 1.0
-        reward = 10*forward_reward - ctrl_cost - contact_cost + survive
+        reward = 5*forward_reward+ 10*dist_reward - ctrl_cost - contact_cost + survive
 
         reward_info = dict()
+        reward_info['reward_dist'] = dist_reward
         reward_info['reward_forward'] = forward_reward
         reward_info['reward_ctrl'] = ctrl_cost
         reward_info['reward_contact'] = contact_cost
