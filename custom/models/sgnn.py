@@ -225,8 +225,8 @@ class SGNN(nn.Module):
                            last_act=False,
                            flat=False)
         
-        self.message_passing = SGNNMessagePassingLayer(node_f_dim=self.z_dim, node_s_dim=msg_dim, edge_f_dim=self.z_num, edge_s_dim=self.z_dim, hidden_dim=msg_dim, vector_dim=self.z_dim, activation=activation)
-        self.dist_rbf = DistanceRBF(num_channels=self.z_dim)
+        self.message_passing = SGNNMessagePassingLayer(node_f_dim=self.z_dim, node_s_dim=msg_dim, edge_f_dim=self.z_num, edge_s_dim=1, hidden_dim=msg_dim, vector_dim=self.z_dim, activation=activation)
+        # self.dist_rbf = DistanceRBF(num_channels=self.z_dim)
 
     def forward(self, x, edge_index):
         h_a, Z, h = x[...,:self.attr_fixed_dim], x[..., self.attr_fixed_dim:self.attr_fixed_dim+self.z_num*3], x[..., self.attr_fixed_dim+self.z_num*3:]
@@ -240,8 +240,8 @@ class SGNN(nn.Module):
         # edge_attr_inter_s = torch.linalg.norm(edge_attr_inter_f, dim=-1).unsqueeze(-1)
         # edge_attr_inter_f = edge_attr_inter_f.unsqueeze(-1)  # [M, 3, 1]
 
-        dist = torch.linalg.norm(f_p[edge_index[1]] - f_p[edge_index[0]], dim=-1).unsqueeze(-1)
-        edge_attr_inter_s = self.dist_rbf(dist, dim=-1) 
+        edge_attr_inter_s = torch.linalg.norm(f_p[edge_index[1]] - f_p[edge_index[0]], dim=-1).unsqueeze(-1)
+        # edge_attr_inter_s = self.dist_rbf(dist, dim=-1) 
 
         h = self.embedding_in(h)  # [N, H]
         Z = self.embedding_z(Z)
