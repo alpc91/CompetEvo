@@ -43,7 +43,7 @@ class EvoAnt(Ant):
         self.attr_specs = set(cfg.obs_specs.get('attr', []))
         self.control_action_dim = 1
         self.skel_num_action = 3 if cfg.enable_remove else 2
-        self.sim_obs_dim = 21#15+2 #13
+        self.sim_obs_dim = 15+2 #13
         self.attr_fixed_dim = self.get_attr_fixed().shape[-1]
 
         self.state_dim = self.attr_fixed_dim + self.sim_obs_dim + self.attr_design_dim
@@ -280,50 +280,38 @@ class EvoAnt(Ant):
         #     body_names.append(body.name)
         # print(body_names)
 
-        qpos = self.get_qpos()
-        qvel = self.get_qvel()
-        if self.clip_qvel:
-            qvel = np.clip(qvel, -10, 10)
-
-        root_pos = qpos[:2]
-        root_pos = np.append(root_pos, 0)
-
         other_pos = self.get_other_qpos()[:2]
         if other_pos.shape == (0,):
             # other_pos = np.zeros(2) # x and y
-            # other_pos = np.random.uniform(-5, 5, 2)
-            other_pos = np.array([self.GOAL[0],self.GOAL[1],0])
-            other_pos = other_pos - root_pos
+            other_pos = np.random.uniform(-5, 5, 2)
 
-
-        
         for i, body in enumerate(self.robot.bodies):
+            qpos = self.get_qpos()
+            qvel = self.get_qvel()
+            if self.clip_qvel:
+                qvel = np.clip(qvel, -10, 10)
             # print(self.id, self.joint_names[i])
             # print(self.id, self.qvel_start_idx, self.qvel_end_idx)
             if i == 0:
-                # obs_i = [qpos[2:7], qvel[:6], np.zeros(2), other_pos]
-                obs_i = [self.env.data.body(self.scope + "/" +body.name).xpos - root_pos, other_pos, np.array([0,0,9.8]),self.quat2euler(self.env.data.body(self.scope + "/" +body.name).xquat), qvel[:6], self.env.data.body(self.scope + "/" +body.name).xpos[2:3],np.zeros(2)]
+                obs_i = [qpos[2:7], qvel[:6], np.zeros(2), other_pos]
             else:
                 # print(self.id, i, body.name)
                 qs, qe = get_single_body_qposaddr(self.env.model, self.scope + "/" + body.name)
-                # # if self.id == 1:
-                # #     print(qs-1-self.id, qe-1-self.id)
-                # #     print(self.id, i, qvel[:])
-                # #     print(self.id, i, self.env.data.qvel[10:])
+                # if self.id == 1:
+                #     print(qs-1-self.id, qe-1-self.id)
+                #     print(self.id, i, qvel[:])
+                #     print(self.id, i, self.env.data.qvel[10:])
                 if qe - qs >= 1:
                     assert qe - qs == 1
-                    angle =  np.append(self.env.data.qpos[qs:qe], self.env.data.qvel[qs-1-self.id:qe-1-self.id])
-                #     # print(qs, qe)
-                #     obs_i = [np.zeros(11), self.env.data.qpos[qs:qe], self.env.data.qvel[qs-1-self.id:qe-1-self.id], other_pos]
+                    # print(qs, qe)
+                    obs_i = [np.zeros(11), self.env.data.qpos[qs:qe], self.env.data.qvel[qs-1-self.id:qe-1-self.id], other_pos]
                 else:
-                    angle = np.zeros(2)
-                #     obs_i = [np.zeros(13), other_pos]
-                obs_i = [self.env.data.body(self.scope + "/" +body.name).xpos - root_pos, other_pos,  np.array([0,0,9.8]),self.quat2euler(self.env.data.body(self.scope + "/" +body.name).xquat), np.zeros(6), self.env.data.body(self.scope + "/" +body.name).xpos[2:3],angle]
-            # if 'root_offset' in self.sim_specs:
-            #     offset = self.data.body_xpos[self.model._body_name2id[body.name]][[0, 2]] - root_pos[[0, 2]]
-            #     obs_i.append(offset)
+                    obs_i = [np.zeros(13), other_pos]
+            if 'root_offset' in self.sim_specs:
+                offset = self.data.body_xpos[self.model._body_name2id[body.name]][[0, 2]] - root_pos[[0, 2]]
+                obs_i.append(offset)
             
-            # obs_i.append(self.GOAL)
+            obs_i.append(self.GOAL)
             obs_i = np.concatenate(obs_i)
             obs.append(obs_i)
             # print(i, obs_i.shape)

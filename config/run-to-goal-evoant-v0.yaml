@@ -88,13 +88,13 @@ robot:
   param_mapping: sin
   no_root_offset: true
   
-  # body_params:
-  #   offset:
-  #     type: 'xy'
-  #     lb: [-0.5, -0.5]
-  #     ub: [0.5, 0.5]
-      # lb: [-0.4, -0.4]
-      # ub: [0.4, 0.4]
+  body_params:
+    offset:
+      type: 'xy'
+  # #     lb: [-0.5, -0.5]
+  # #     ub: [0.5, 0.5]
+      lb: [-0.4, -0.4]
+      ub: [0.4, 0.4]
 
   joint_params: {}
 
@@ -104,7 +104,7 @@ robot:
       ub: 0.10
     # ext_start:
     #   lb: 0.0
-    #   ub: 0.2
+    #   ub: 0.1
 
   actuator_params:
     gear:
