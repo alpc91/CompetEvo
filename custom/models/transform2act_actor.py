@@ -9,7 +9,8 @@ from lib.utils.math import *
 
 from custom.models.gnn import GNNSimple
 from custom.models.jsmlp import JSMLP
-from custom.models.updown import FrameGNN
+# from custom.models.updown import FrameGNN
+from custom.models.sgnn import SGNN
 from custom.utils.tools import *
 
 
@@ -32,7 +33,7 @@ class Transform2ActPolicy(Policy):
         self.skel_uniform_prob = cfg.get('skel_uniform_prob', 0.0)
 
         if 'egnn' in cfg and cfg['egnn']:
-            self.frame_gnn = FrameGNN(state_dim = self.sim_obs_dim, attr_fixed_dim = self.attr_fixed_dim, attr_design_dim = self.attr_design_dim, msg_dim = 16, max_children = 4)
+            self.frame_gnn = SGNN(state_dim = self.sim_obs_dim, attr_fixed_dim = self.attr_fixed_dim, attr_design_dim = self.attr_design_dim, msg_dim = 32)
         else:
             self.frame_gnn = None
 
@@ -154,10 +155,10 @@ class Transform2ActPolicy(Policy):
         # execution
         if len(x_dict['execution']) > 0:
             obs, edges, _, num_nodes, num_nodes_cum_control, body_ind = self.batch_data(x_dict['execution'])
-            x = self.control_norm(obs)
+            # x = self.control_norm(obs)
             if self.frame_gnn is not None:
-                self.frame_gnn.change_morphology(edges, num_nodes)
-                x = self.frame_gnn(x)
+                # self.frame_gnn.change_morphology(edges, num_nodes)
+                x = self.frame_gnn(obs, edges)
 
             if self.control_pre_mlp is not None:
                 x = self.control_pre_mlp(x)
