@@ -6,32 +6,32 @@ import torch.nn.functional as F
 
 
 
-class DistanceRBF:
-    def __init__(self, num_channels=64, start=0.0, stop=2.0):
-        self.num_channels = num_channels
-        self.start = start
-        self.stop = stop * 10
-        self.params = self.initialize_params()
+# class DistanceRBF:
+#     def __init__(self, num_channels=64, start=0.0, stop=2.0):
+#         self.num_channels = num_channels
+#         self.start = start
+#         self.stop = stop * 10
+#         self.params = self.initialize_params()
 
-    def initialize_params(self):
-        offset = torch.linspace(self.start, self.stop, self.num_channels - 2).to('cuda')
-        coeff = (-0.5 / (offset[1] - offset[0])**2).to('cuda')
-        return {'offset': offset, 'coeff': coeff}
+#     def initialize_params(self):
+#         offset = torch.linspace(self.start, self.stop, self.num_channels - 2).to('cuda')
+#         coeff = (-0.5 / (offset[1] - offset[0])**2).to('cuda')
+#         return {'offset': offset, 'coeff': coeff}
 
-    def __call__(self, dist, dim):
-        assert dist.shape[dim] == 1
-        dist = dist * 10
-        offset_shape = [1] * len(dist.shape)
-        offset_shape[dim] = -1
+#     def __call__(self, dist, dim):
+#         assert dist.shape[dim] == 1
+#         dist = dist * 10
+#         offset_shape = [1] * len(dist.shape)
+#         offset_shape[dim] = -1
 
-        offset = self.params['offset'].reshape(offset_shape).to('cuda')
-        coeff = self.params['coeff']
+#         offset = self.params['offset'].reshape(offset_shape).to('cuda')
+#         coeff = self.params['coeff']
 
-        overflow_symb = (dist >= self.stop).type(torch.float32).to('cuda')
-        underflow_symb = (dist < self.start).type(torch.float32).to('cuda')
-        y = dist - offset
-        y = torch.exp(coeff * torch.square(y))
-        return torch.cat([underflow_symb, y, overflow_symb], dim=dim)
+#         overflow_symb = (dist >= self.stop).type(torch.float32).to('cuda')
+#         underflow_symb = (dist < self.start).type(torch.float32).to('cuda')
+#         y = dist - offset
+#         y = torch.exp(coeff * torch.square(y))
+#         return torch.cat([underflow_symb, y, overflow_symb], dim=dim)
 
 
 def normalize_vector(v, dim, eps=1e-6):
@@ -227,7 +227,7 @@ class SGNN(nn.Module):
                            flat=False)
         
         self.message_passing = SGNNMessagePassingLayer(node_f_dim=self.z_dim, node_s_dim=msg_dim, edge_f_dim=self.z_num, edge_s_dim=1, hidden_dim=msg_dim, vector_dim=self.z_dim, activation=activation)
-        self.dist_rbf = DistanceRBF(num_channels=self.z_dim)
+        # self.dist_rbf = DistanceRBF(num_channels=self.z_dim)
 
     def forward(self, x, edge_index):
         h_a, Z, h = x[...,:self.attr_fixed_dim], x[..., self.attr_fixed_dim:self.attr_fixed_dim+self.z_num*3], x[..., self.attr_fixed_dim+self.z_num*3:]
