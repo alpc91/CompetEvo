@@ -14,8 +14,8 @@ class DistanceRBF:
         self.params = self.initialize_params()
 
     def initialize_params(self):
-        offset = torch.linspace(self.start, self.stop, self.num_channels - 2)
-        coeff = -0.5 / (offset[1] - offset[0])**2
+        offset = torch.linspace(self.start, self.stop, self.num_channels - 2).to('cuda')
+        coeff = (-0.5 / (offset[1] - offset[0])**2).to('cuda')
         return {'offset': offset, 'coeff': coeff}
 
     def __call__(self, dist, dim):
@@ -24,11 +24,11 @@ class DistanceRBF:
         offset_shape = [1] * len(dist.shape)
         offset_shape[dim] = -1
 
-        offset = self.params['offset'].reshape(offset_shape)
+        offset = self.params['offset'].reshape(offset_shape).to('cuda')
         coeff = self.params['coeff']
 
-        overflow_symb = (dist >= self.stop).type(torch.float32)
-        underflow_symb = (dist < self.start).type(torch.float32)
+        overflow_symb = (dist >= self.stop).type(torch.float32).to('cuda')
+        underflow_symb = (dist < self.start).type(torch.float32).to('cuda')
         y = dist - offset
         y = torch.exp(coeff * torch.square(y))
         return torch.cat([underflow_symb, y, overflow_symb], dim=dim)
@@ -217,7 +217,8 @@ class SGNN(nn.Module):
         self.z_dim = 16
         self.embedding_in = nn.Linear(self.attr_fixed_dim+self.attr_design_dim+self.state_dim-self.z_num*3, msg_dim)
         self.embedding_z = nn.Linear(self.z_num, self.z_dim, bias=False)
-        self.embedding_out = BaseMLP(input_dim=msg_dim,
+        self.embedding_u = nn.Linear(self.z_dim, 1, bias=False)
+        self.embedding_out = BaseMLP(input_dim=msg_dim+self.z_num*3,
                            hidden_dim=msg_dim,
                            output_dim=self.attr_fixed_dim+self.attr_design_dim+self.state_dim,
                            activation=activation,
@@ -226,7 +227,7 @@ class SGNN(nn.Module):
                            flat=False)
         
         self.message_passing = SGNNMessagePassingLayer(node_f_dim=self.z_dim, node_s_dim=msg_dim, edge_f_dim=self.z_num, edge_s_dim=1, hidden_dim=msg_dim, vector_dim=self.z_dim, activation=activation)
-        # self.dist_rbf = DistanceRBF(num_channels=self.z_dim)
+        self.dist_rbf = DistanceRBF(num_channels=self.z_dim)
 
     def forward(self, x, edge_index):
         h_a, Z, h = x[...,:self.attr_fixed_dim], x[..., self.attr_fixed_dim:self.attr_fixed_dim+self.z_num*3], x[..., self.attr_fixed_dim+self.z_num*3:]
@@ -235,6 +236,7 @@ class SGNN(nn.Module):
 
         f_p = Z[:,0]  # [M, 3]
         Z = Z.transpose(-2, -1)
+        Z0 = Z
 
         edge_attr_inter_f = (Z[edge_index[1]] - Z[edge_index[0]]) 
         # edge_attr_inter_s = torch.linalg.norm(edge_attr_inter_f, dim=-1).unsqueeze(-1)
@@ -248,6 +250,18 @@ class SGNN(nn.Module):
 
         for _ in range(self.p_step):
             Z, h = self.message_passing(Z, h, edge_index, edge_attr_inter_f, edge_attr_inter_s)  # [N_obj, 3, vector_dim], [N_obj, 2vector_dim]
+
+
+        # f_p = self.embedding_f(torch.transpose(f_p, 0, -1))
+        # f_p = torch.transpose(f_p, 0, -1)
+        u = self.embedding_u(Z)
+        mat = construct_3d_basis_from_1_vectors(u[..., 0])  # [2,3,3]
+        f_p = torch.einsum('bij,bjk->bik', mat.transpose(-1,-2), Z0)  # [N, 3, 32]
+        f_p = f_p.transpose(-1, -2)
+        f_p = f_p.reshape(f_p.shape[0], -1)  # [N, 3*32]
+        # F_norm = torch.linalg.norm(f_p, axis=-1, keepdims=True) + 1.0
+        h = torch.cat((f_p, h), axis=-1)  # [3*N=32*3+H] #s_o_[self.obj_id]
+
 
         h = self.embedding_out(h)
         return h
