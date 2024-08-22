@@ -27,6 +27,9 @@
     <geom contype="1" conaffinity="1" friction="1 .1 .1" condim="3" material="MatPlane" name="floor" pos="0 0 0" rgba="1 1 1 1" size="20 20 0.125" type="plane"/>
     <!-- <geom fromto="4 -5 0  4 +5 0" name="rightgoal" rgba="1 0 0 0.5" size=".03" type="cylinder"/>
     <geom fromto="-4 -5 0  -4 +5 0" name="leftgoal" rgba="1 0 0 0.5" size=".03" type="cylinder"/> -->
-    <geom pos="0 0 0" size="0.5" type="sphere" name="goal" rgba="0 1 0 0.5"/>
+    <!-- <geom pos="0 0 0" size="0.5" type="sphere" name="goal" rgba="0 1 0 0.5"/> -->
+    <body name="goal" pos="0 0 0" euler="0 0 0">
+      <geom pos="0 0 0" size="0.25" type="sphere" rgba="0 1 0 0.5"/>
+    </body>
   </worldbody>
 </mujoco>

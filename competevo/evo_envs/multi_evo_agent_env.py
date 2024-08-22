@@ -116,10 +116,10 @@ class MultiEvoAgentEnv(MujocoEnv):
         # self.RIGHT_GOAL = self.env_scene.model.geom_pos[gid][0]
         # gid = self.env_scene.geom_names.index('leftgoal')
         # self.LEFT_GOAL = self.env_scene.model.geom_pos[gid][0]
-        for i in range(self.n_agents):
-            gid = self.env_scene.geom_names.index('goal')
-            self.GOAL = self.env_scene.model.geom_pos[gid][:2]
-            self.agents[i].set_goal(self.GOAL)
+        # for i in range(self.n_agents):
+        #     gid = self.env_scene.geom_names.index('goal')
+        #     self.GOAL = self.env_scene.model.geom_pos[gid][:2]
+        #     self.agents[i].set_goal(self.GOAL)
             # if self.agents[i].get_qpos()[0] > 0:
             #     self.agents[i].set_goal(self.LEFT_GOAL)
             # else:
@@ -138,10 +138,10 @@ class MultiEvoAgentEnv(MujocoEnv):
         self.metadata = self.env_scene.metadata
         
 
-        for i in range(self.n_agents):
-            gid = self.env_scene.geom_names.index('goal')
-            self.GOAL = self.env_scene.model.geom_pos[gid][:2]
-            self.agents[i].set_goal(self.GOAL)
+        # for i in range(self.n_agents):
+        #     gid = self.env_scene.geom_names.index('goal')
+        #     self.GOAL = self.env_scene.model.geom_pos[gid][:2]
+        #     self.agents[i].set_goal(self.GOAL)
 
         # gid = self.env_scene.geom_names.index('rightgoal')
         # self.RIGHT_GOAL = self.env_scene.model.geom_pos[gid][0]
@@ -182,10 +182,10 @@ class MultiEvoAgentEnv(MujocoEnv):
         self.metadata = self.env_scene.metadata
 
 
-        for i in range(self.n_agents):
-            gid = self.env_scene.geom_names.index('goal')
-            self.GOAL = self.env_scene.model.geom_pos[gid][:2]
-            self.agents[i].set_goal(self.GOAL)
+        # for i in range(self.n_agents):
+        #     gid = self.env_scene.geom_names.index('goal')
+        #     self.GOAL = self.env_scene.model.geom_pos[gid][:2]
+        #     self.agents[i].set_goal(self.GOAL)
         
         # gid = self.env_scene.geom_names.index('rightgoal')
         # self.RIGHT_GOAL = self.env_scene.model.geom_pos[gid][0]

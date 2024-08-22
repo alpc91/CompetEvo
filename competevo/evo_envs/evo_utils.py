@@ -60,15 +60,15 @@ def create_multiagent_xml_str(
     world_root = world.getroot()
     world_default = world_root.find('default')
     world_body = world_root.find('worldbody')
-    goal_pos_r = np.random.uniform(5, 10)
-    goal_pos_theta = np.random.uniform(0, 2*np.pi)
-    if symmetric:
-        goal_pos = (goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0)
-    else:
-        goal_pos = (-10,0,0)
-    for child in list(world_body):
-        if child.tag == 'geom' and child.get('name') == 'goal':
-            child.set('pos', tuple_to_str(goal_pos))
+    # goal_pos_r = np.random.uniform(5, 10)
+    # goal_pos_theta = np.random.uniform(0, 2*np.pi)
+    # if symmetric:
+    #     goal_pos = (goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0)
+    # else:
+    #     goal_pos = (-10,0,0)
+    # for child in list(world_body):
+    #     if child.tag == 'geom' and child.get('name') == 'goal':
+    #         child.set('pos', tuple_to_str(goal_pos))
         # elif child.tag == 'geom' and child.get('name') == 'rightgoal':
         #     child.set('visible', 'False')
         # elif child.tag == 'geom' and child.get('name') == 'leftgoal':
