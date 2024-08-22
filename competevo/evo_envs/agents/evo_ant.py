@@ -73,7 +73,7 @@ class EvoAnt(Ant):
         return np.array([X, Y, Z])
     
     def before_step(self):
-        self.env.data.geom_xpos[1] = self.GOAL
+        self.env.data.geom_xpos[1] = self.GOAL/2
         self._xposbefore = self.get_body_com("0")[:2]
 
         self.dist_before = np.linalg.norm(self.GOAL[:2]-self._xposbefore)
@@ -143,6 +143,7 @@ class EvoAnt(Ant):
         info = reward_info
         info['use_transform_action'] = False
         info['stage'] = 'execution'
+        info['dist'] = self.dist_after
 
         # terminate condition
         qpos = self.get_qpos()
@@ -219,7 +220,7 @@ class EvoAnt(Ant):
         # goal_pos_r = np.random.uniform(3, 4)
         # goal_pos_theta = np.random.uniform(0, 2*np.pi)
         # goal = np.array([goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0])
-        goal = np.array([10,0,0])
+        goal = np.array([40,0,0])
         # self.env.data.geom_xpos[1] = goal
         self.set_goal(goal)
         # pass
@@ -318,8 +319,9 @@ class EvoAnt(Ant):
         if other_pos.shape == (0,):
             # other_pos = np.zeros(2) # x and y
             # other_pos = np.random.uniform(-5, 5, 2)
-            other_pos = self.GOAL#np.array([self.GOAL[0],self.GOAL[1],0])
-            other_pos = other_pos - root_pos
+            # other_pos = self.GOAL#np.array([self.GOAL[0],self.GOAL[1],0])
+            # other_pos = other_pos - root_pos
+            other_pos = np.zeros(3)
 
         # self.env.data.geom_xpos[1] = np.array([0,0,1])
         

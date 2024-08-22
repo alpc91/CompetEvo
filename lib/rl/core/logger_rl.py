@@ -9,7 +9,7 @@ class LoggerRL:
         self.num_steps = 0
         self.num_episodes = 0
         self.sample_time = 0
-        self.stats_names = ['episode_len', 'reward', 'episode_reward']
+        self.stats_names = ['episode_len', 'reward', 'episode_reward', 'dist']
         self.stats_nparray = []
         if self.use_c_reward:
             self.stats_nparray += ['c_info']
@@ -26,6 +26,8 @@ class LoggerRL:
         self.episode_len += 1
         self.episode_reward += reward
         self.stats_loggers['reward'].log(reward)
+        if 'dist' in info:
+            self.stats_loggers['dist'].log(info['dist'])
         if self.use_c_reward:
             self.episode_c_reward += c_reward
             self.stats_loggers['c_reward'].log(c_reward)
@@ -59,6 +61,8 @@ class LoggerRL:
         logger.max_reward = logger.stats_loggers['reward'].max()
         logger.min_reward = logger.stats_loggers['reward'].min()
         logger.avg_reward = logger.stats_loggers['reward'].avg()
+        logger.min_dist = logger.stats_loggers['dist'].min()
+        logger.max_dist = logger.stats_loggers['dist'].max()
         if logger.use_c_reward:
             logger.total_c_reward = logger.stats_loggers['c_reward'].total()
             logger.avg_c_reward = logger.stats_loggers['c_reward'].avg()

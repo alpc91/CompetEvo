@@ -137,12 +137,16 @@ class MultiEvoAgentRunner(BaseRunner):
             logger.info("Agent_{} gets train_num_steps: {:.2f}.".format(i, logs[i].num_steps))
             logger.info("Agent_{} gets train_avg_episode_len: {:.2f}.".format(i, logs[i].avg_episode_len))
             logger.info("Agent_{} gets train_avg_episode_reward: {:.2f}.".format(i, logs[i].avg_episode_reward))
+            logger.info("Agent_{} gets train_min_dist: {:.2f}.".format(i, logs[i].min_dist))
+            logger.info("Agent_{} gets train_max_dist: {:.2f}.".format(i, logs[i].max_dist))
             logger.info("Agent_{} gets train_win rate: {:.2f}.".format(i, t_win_rate[i]))
 
             logger.info("Agent_{} gets eval_num_episodes: {:.2f}.".format(i, log_evals[i].num_episodes))
             logger.info("Agent_{} gets eval_num_steps: {:.2f}.".format(i, log_evals[i].num_steps))
             logger.info("Agent_{} gets eval eval_avg_episode_len: {:.2f}.".format(i, log_evals[i].avg_episode_len))
             logger.info("Agent_{} gets eval eval_avg_episode_reward: {:.2f}.".format(i, log_evals[i].avg_episode_reward))
+            logger.info("Agent_{} gets eval_min_dist: {:.2f}.".format(i, log_evals[i].min_dist))
+            logger.info("Agent_{} gets eval_max_dist: {:.2f}.".format(i, log_evals[i].max_dist))
             logger.info("Agent_{} gets eval_win rate: {:.2f}.".format(i, win_rate[i]))
 
             # logger.info("Agent_{} gets best_eval_num_episodes: {:.2f}.".format(i, log_best_evals[i].num_episodes))
@@ -193,6 +197,14 @@ class MultiEvoAgentRunner(BaseRunner):
             writer.add_scalar("eval_episode_length", log_evals[i].avg_episode_len, epoch)
             # eps len
             # writer.add_scalar("best_eval_episode_length", log_best_evals[i].avg_episode_len, epoch)
+
+            # min dist
+            writer.add_scalar("train_min_dist", logs[i].min_dist, epoch)
+            writer.add_scalar("eval_min_dist", log_evals[i].min_dist, epoch)
+
+            # max dist
+            writer.add_scalar("train_max_dist", logs[i].max_dist, epoch)
+            writer.add_scalar("eval_max_dist", log_evals[i].max_dist, epoch)
 
             
             # policy loss
