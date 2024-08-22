@@ -248,7 +248,8 @@ class SGNN(nn.Module):
         f_p = Z[...,0]  # [M, 3]
 
 
-        # Z0 = Z
+        Z0 = Z
+        h0 = h
 
         edge_attr_inter_f = (Z[edge_index[1]] - Z[edge_index[0]]) 
         # edge_attr_inter_s = torch.linalg.norm(edge_attr_inter_f, dim=-1).unsqueeze(-1)
@@ -272,18 +273,17 @@ class SGNN(nn.Module):
         # Z = torch.einsum('bij,bjk->bik', O, Z)
 
 
-        # f_p = self.embedding_f(torch.transpose(f_p, 0, -1))
-        # f_p = torch.transpose(f_p, 0, -1)
-        # u = self.embedding_u(Z)
-        # mat = construct_3d_basis_from_1_vectors(u[..., 0])  # [2,3,3]
-        # f_p = torch.einsum('bij,bjk->bik', mat.transpose(-1,-2), Z0)  # [N, 3, 32]
-        # f_p = f_p.transpose(-1, -2)
-        # f_p = f_p.reshape(f_p.shape[0], -1)  # [N, 3*32]
-        # # F_norm = torch.linalg.norm(f_p, axis=-1, keepdims=True) + 1.0
-        # h = torch.cat((f_p, h), axis=-1)  # [3*N=32*3+H] #s_o_[self.obj_id]
+
+        u = self.embedding_u(Z)
+        mat = construct_3d_basis_from_1_vectors(u[..., 0])  # [2,3,3]
+        f_p = torch.einsum('bij,bjk->bik', mat.transpose(-1,-2), Z0)  # [N, 3, 32]
+        f_p = f_p.transpose(-1, -2)
+        f_p = f_p.reshape(f_p.shape[0], -1)  # [N, 3*32]
+        # F_norm = torch.linalg.norm(f_p, axis=-1, keepdims=True) + 1.0
+        h = torch.cat((f_p, h0), axis=-1)  # [3*N=32*3+H] #s_o_[self.obj_id]
 
 
-        h = self.embedding_out(h)
+        # h = self.embedding_out(h)
         return h
         # Z = self.embedding_f(jnp.swapaxes(Z, 0, -1))
         # f_p = jnp.swapaxes(f_p, 0, -1)

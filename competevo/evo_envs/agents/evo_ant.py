@@ -109,8 +109,8 @@ class EvoAnt(Ant):
     def after_step(self, action):
         xposafter = self.get_body_com("0")[:2]
         # forward_reward = (xposafter - self._xposbefore) / self.env.dt
-        dist_after = np.linalg.norm(self.GOAL-xposafter)
-        dist_reward = (self.dist_before - dist_after) / self.env.dt
+        self.dist_after = np.linalg.norm(self.GOAL-xposafter)
+        dist_reward = (self.dist_before - self.dist_after) / self.env.dt
 
 
         heading = np.array([np.cos(self.torso_euler[2]), np.sin(self.torso_euler[2])])
@@ -156,6 +156,20 @@ class EvoAnt(Ant):
         # terminated = not (np.isfinite(self.get_qpos()).all() and np.isfinite(self.get_qvel()).all() and (height > min_height) and (height < max_height) and (abs(ang) < np.deg2rad(max_ang)))
         terminated = not (np.isfinite(self.get_qpos()).all() and np.isfinite(self.get_qvel()).all() and (height > min_height) and (height < max_height))
         info['dead'] = (height <= min_height) 
+
+        # if self.reached_goal():
+        #     print("setp——reached_goal")
+        #     reward += 1000
+        #     goal_pos_r = np.random.uniform(2, 3)
+        #     goal_pos_theta = np.random.uniform(0, 2*np.pi)
+        #     goal = np.array([goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0])
+        #     print("before")
+        #     print(self.env.data.geom_xpos[1])
+        #     self.env.data.geom_xpos[1] = goal
+        #     self.set_goal(goal[:2])
+        #     print("after")
+        #     print(self.env.data.geom_xpos[1])
+
         return reward, terminated, info
 
 
@@ -188,17 +202,28 @@ class EvoAnt(Ant):
 
 
     def reached_goal(self):
-        if self.n_agents == 1: return False
-        xpos = self.get_body_com('0')[0]
-        if self.GOAL > 0 and xpos > self.GOAL:
-            return True
-        elif self.GOAL < 0 and xpos < self.GOAL:
+        if self.dist_after < 0.5:
+            print("Reached Goal")
             return True
         return False
+        # if self.n_agents == 1: return False
+        # xpos = self.get_body_com('0')[0]
+        # if self.GOAL > 0 and xpos > self.GOAL:
+        #     return True
+        # elif self.GOAL < 0 and xpos < self.GOAL:
+        #     return True
+        # return False
 
     def reset_agent(self):
-        xpos = self.get_qpos()[0]
-        self.set_goal(self.GOAL)
+        # goal_pos_r = np.random.uniform(2, 3)
+        # goal_pos_theta = np.random.uniform(0, 2*np.pi)
+        # goal = np.array([goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0])
+        # goal = np.array([5,5,0])
+        # self.env.data.geom_xpos[1] = goal
+        # self.set_goal(goal[:2])
+        pass
+        # xpos = self.get_qpos()[0]
+        # self.set_goal(self.GOAL)
         # if xpos * self.GOAL > 0 :
         #     self.set_goal(-self.GOAL)
         # if xpos > 0:
@@ -295,7 +320,7 @@ class EvoAnt(Ant):
             other_pos = np.array([self.GOAL[0],self.GOAL[1],0])
             other_pos = other_pos - root_pos
 
-
+        # self.env.data.geom_xpos[1] = np.array([0,0,1])
         
         for i, body in enumerate(self.robot.bodies):
             # print(self.id, self.joint_names[i])
