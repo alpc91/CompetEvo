@@ -38,7 +38,7 @@ evo_policy_specs:
   attr_log_std: -2.3
   fix_control_std: false
   fix_attr_std: false
-  egnn: True
+  # egnn: True
 policy_optimizer: 'Adam'
 policy_lr: 5.e-5
 policy_momentum: 0.0
@@ -53,7 +53,7 @@ evo_value_specs:
     hdims: [64, 64, 64]
     aggr: add
     bias: true
-  egnn: True
+  # egnn: True
 value_optimizer: 'Adam'
 value_lr: 3.e-4
 value_momentum: 0.0
@@ -74,8 +74,8 @@ done_condition:
 
 obs_specs:
   attr: ['depth']
-  # sim: []
-  sim: ['noquat']
+  sim: []
+  # sim: ['noquat']
   design: true
   clip_qvel: true
   use_projected_params: true
@@ -122,4 +122,4 @@ use_exploration_curriculum: False
 termination_epoch: 1000
 use_parse_reward: False
 
-symmetric: True
+symmetric: False

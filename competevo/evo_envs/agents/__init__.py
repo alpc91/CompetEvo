@@ -1,4 +1,5 @@
 from .evo_ant import EvoAnt
+from .evo_ant_turn import EvoAntTurn
 from .dev_ant import DevAnt
 from .dev_ant_fighter import DevAntFighter
 

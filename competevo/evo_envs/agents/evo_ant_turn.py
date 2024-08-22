@@ -16,10 +16,10 @@ from custom.utils.transformation import quaternion_matrix
 
 UNCHANGED = ["11", "12", "13", "14"]
 
-class EvoAnt(Ant):
+class EvoAntTurn(Ant):
 
     def __init__(self, agent_id, cfg, xml_path=None, n_agents=2):
-        super(EvoAnt, self).__init__(agent_id, xml_path, n_agents)
+        super(EvoAntTurn, self).__init__(agent_id, xml_path, n_agents)
         self.cfg = cfg
         self.xml_folder = os.path.dirname(xml_path)
 
@@ -158,16 +158,16 @@ class EvoAnt(Ant):
         terminated = not (np.isfinite(self.get_qpos()).all() and np.isfinite(self.get_qvel()).all() and (height > min_height) and (height < max_height))
         info['dead'] = (height <= min_height) 
 
-        # if self.reached_goal():
-        #     # print("setp——reached_goal")
-        #     reward += 1000
-        #     goal_pos_r = np.random.uniform(3, 4)
-        #     goal_pos_theta = np.random.uniform(0, 2*np.pi)
-        #     goal = np.array([goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0])
-        #     goal[:2] += xposafter
-        #     # print("before")
-        #     # print(self.env.data.geom_xpos[1])
-        #     self.set_goal(goal)
+        if self.reached_goal():
+            # print("setp——reached_goal")
+            reward += 1000
+            goal_pos_r = np.random.uniform(3, 4)
+            goal_pos_theta = np.random.uniform(0, 2*np.pi)
+            goal = np.array([goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0])
+            goal[:2] += xposafter
+            # print("before")
+            # print(self.env.data.geom_xpos[1])
+            self.set_goal(goal)
             # print("after")
             # print(self.env.data.geom_xpos[1])
 
@@ -216,10 +216,10 @@ class EvoAnt(Ant):
         # return False
 
     def reset_agent(self):
-        # goal_pos_r = np.random.uniform(3, 4)
-        # goal_pos_theta = np.random.uniform(0, 2*np.pi)
-        # goal = np.array([goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0])
-        goal = np.array([10,0,0])
+        goal_pos_r = np.random.uniform(3, 4)
+        goal_pos_theta = np.random.uniform(0, 2*np.pi)
+        goal = np.array([goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0])
+        # goal = np.array([5,5,0])
         # self.env.data.geom_xpos[1] = goal
         self.set_goal(goal)
         # pass
