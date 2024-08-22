@@ -300,9 +300,13 @@ class EvoAnt(Ant):
         for i, body in enumerate(self.robot.bodies):
             # print(self.id, self.joint_names[i])
             # print(self.id, self.qvel_start_idx, self.qvel_end_idx)
+            if 'noquat' in self.sim_specs:
+                quat = np.zeros(3)
+            else:
+                quat = self.quat2euler(self.env.data.body(self.scope + "/" +body.name).xquat)
             if i == 0:
                 # obs_i = [qpos[2:7], qvel[:6], np.zeros(2), other_pos]
-                obs_i = [self.env.data.body(self.scope + "/" +body.name).xpos - root_pos, other_pos, np.array([0,0,9.8]),self.quat2euler(self.env.data.body(self.scope + "/" +body.name).xquat), qvel[:6], self.env.data.body(self.scope + "/" +body.name).xpos[2:3],np.zeros(2)]
+                obs_i = [self.env.data.body(self.scope + "/" +body.name).xpos - root_pos, other_pos, np.array([0,0,9.8]), quat , qvel[:6], self.env.data.body(self.scope + "/" +body.name).xpos[2:3],np.zeros(2)]
             else:
                 # print(self.id, i, body.name)
                 qs, qe = get_single_body_qposaddr(self.env.model, self.scope + "/" + body.name)
@@ -318,7 +322,7 @@ class EvoAnt(Ant):
                 else:
                     angle = np.zeros(2)
                 #     obs_i = [np.zeros(13), other_pos]
-                obs_i = [self.env.data.body(self.scope + "/" +body.name).xpos - root_pos, other_pos,  np.array([0,0,9.8]),self.quat2euler(self.env.data.body(self.scope + "/" +body.name).xquat), np.zeros(6), self.env.data.body(self.scope + "/" +body.name).xpos[2:3],angle]
+                obs_i = [self.env.data.body(self.scope + "/" +body.name).xpos - root_pos, other_pos,  np.array([0,0,9.8]), quat, np.zeros(6), self.env.data.body(self.scope + "/" +body.name).xpos[2:3],angle]
             # if 'root_offset' in self.sim_specs:
             #     offset = self.data.body_xpos[self.model._body_name2id[body.name]][[0, 2]] - root_pos[[0, 2]]
             #     obs_i.append(offset)

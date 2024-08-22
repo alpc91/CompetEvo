@@ -73,7 +73,7 @@ done_condition:
 
 obs_specs:
   attr: ['depth']
-  sim: []
+  sim: ['noquat']
   design: true
   clip_qvel: true
   use_projected_params: true
