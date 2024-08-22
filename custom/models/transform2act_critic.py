@@ -5,6 +5,7 @@ from lib.models.mlp import MLP
 from lib.rl.core.running_norm import RunningNorm
 from custom.utils.tools import *
 from custom.models.gnn import GNNSimple
+from custom.models.sgnn import SGNN
 
 
 class Transform2ActValue(nn.Module):
@@ -14,7 +15,16 @@ class Transform2ActValue(nn.Module):
         self.agent = agent
         self.design_flag_in_state = cfg.get('design_flag_in_state', False)
         self.onehot_design_flag = cfg.get('onehot_design_flag', False)
+        self.attr_fixed_dim = agent.attr_fixed_dim
+        self.sim_obs_dim = agent.sim_obs_dim
+        self.attr_design_dim = agent.attr_design_dim
         self.state_dim = agent.state_dim + self.design_flag_in_state * (3 if self.onehot_design_flag else 1)
+
+        if 'egnn' in cfg and cfg['egnn']:
+            self.frame_gnn = SGNN(state_dim = self.sim_obs_dim, attr_fixed_dim = self.attr_fixed_dim, attr_design_dim = self.attr_design_dim+ self.design_flag_in_state * (3 if self.onehot_design_flag else 1), msg_dim = 32)
+        else:
+            self.frame_gnn = None
+
         self.norm = RunningNorm(self.state_dim)
         cur_dim = self.state_dim
         if 'pre_mlp' in cfg:
@@ -67,6 +77,10 @@ class Transform2ActValue(nn.Module):
         else:
             x = obs
         x = self.norm(x)
+
+        if self.frame_gnn is not None:
+            x = self.frame_gnn(x, edges)
+            
         if self.pre_mlp is not None:
             x = self.pre_mlp(x)
         if self.gnn is not None:
