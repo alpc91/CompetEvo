@@ -157,14 +157,14 @@ class SGNNMessagePassingLayer(nn.Module):
         s_c = scatter(_s, edge_index[0], dim=0, reduce='mean', dim_size=f.shape[0]) 
         f2s = torch.einsum('bij,bjk->bik', f.transpose(-1, -2), f)  # [M, vector_dim, vector_dim]
         f2s = f2s.reshape(f2s.shape[0], -1) 
-        F_norm = torch.linalg.norm(f2s, dim=-1, keepdims=True) + 1.0
+        # F_norm = torch.linalg.norm(f2s, dim=-1, keepdims=True) + 1.0
         temp_s = torch.cat((s, s_c, f2s), dim=-1)  # [N, 2S]
-        s_out = self.s_mlp(temp_s)/F_norm
+        s_out = self.s_mlp(temp_s)#/F_norm
 
         _f = self.edge_mlp(_s)[:,None,:]*_f
         f_c = scatter(_f, edge_index[0], dim=0, reduce='mean', dim_size=f.shape[0]) 
         temp_f = torch.cat((f, f_c), dim=-1)  # [N, 3, 2vector_dim]
-        f_out = self.sf_mlp(temp_s)[:,None,:]*self.f_mlp(temp_f)/F_norm[:,None,:]
+        f_out = self.sf_mlp(temp_s)[:,None,:]*self.f_mlp(temp_f)#/F_norm[:,None,:]
 
 
         # if edge_index.shape[1] == 0:
@@ -234,9 +234,21 @@ class SGNN(nn.Module):
         h = torch.cat([h_a, h], dim=-1)
         Z = Z.reshape(-1, self.z_num, 3)
 
-        f_p = Z[:,0]  # [M, 3]
         Z = Z.transpose(-2, -1)
-        Z0 = Z
+
+        # import math
+        # rad = math.pi/4
+        # theta = math.pi*rad
+        # O = torch.tensor([[math.cos(theta), -math.sin(theta), 0],
+        #             [math.sin(theta), math.cos(theta), 0],
+        #             [0, 0, 1]]).unsqueeze(0)
+        # O = O.repeat(Z.shape[0],1,1)
+        # Z = torch.einsum('bij,bjk->bik', O, Z)
+
+        f_p = Z[...,0]  # [M, 3]
+
+
+        # Z0 = Z
 
         edge_attr_inter_f = (Z[edge_index[1]] - Z[edge_index[0]]) 
         # edge_attr_inter_s = torch.linalg.norm(edge_attr_inter_f, dim=-1).unsqueeze(-1)
@@ -250,6 +262,14 @@ class SGNN(nn.Module):
 
         for _ in range(self.p_step):
             Z, h = self.message_passing(Z, h, edge_index, edge_attr_inter_f, edge_attr_inter_s)  # [N_obj, 3, vector_dim], [N_obj, 2vector_dim]
+
+
+        # theta = -math.pi*rad
+        # O = torch.tensor([[math.cos(theta), -math.sin(theta), 0],
+        #             [math.sin(theta), math.cos(theta), 0],
+        #             [0, 0, 1]]).unsqueeze(0)
+        # O = O.repeat(Z.shape[0],1,1)
+        # Z = torch.einsum('bij,bjk->bik', O, Z)
 
 
         # f_p = self.embedding_f(torch.transpose(f_p, 0, -1))
