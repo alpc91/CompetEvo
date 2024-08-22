@@ -79,8 +79,8 @@ class Transform2ActValue(nn.Module):
         x = self.norm(x)
 
         if self.frame_gnn is not None:
-            x = self.frame_gnn(x, edges)
-            
+            x = self.frame_gnn(x, edges, num_nodes_cum)
+
         if self.pre_mlp is not None:
             x = self.pre_mlp(x)
         if self.gnn is not None:

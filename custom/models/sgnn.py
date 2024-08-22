@@ -229,7 +229,7 @@ class SGNN(nn.Module):
         self.message_passing = SGNNMessagePassingLayer(node_f_dim=self.z_dim, node_s_dim=msg_dim, edge_f_dim=self.z_num, edge_s_dim=1, hidden_dim=msg_dim, vector_dim=self.z_dim, activation=activation)
         # self.dist_rbf = DistanceRBF(num_channels=self.z_dim)
 
-    def forward(self, x, edge_index):
+    def forward(self, x, edge_index, num_nodes_cum):
         h_a, Z, h = x[...,:self.attr_fixed_dim], x[..., self.attr_fixed_dim:self.attr_fixed_dim+self.z_num*3], x[..., self.attr_fixed_dim+self.z_num*3:]
         h = torch.cat([h_a, h], dim=-1)
         Z = Z.reshape(-1, self.z_num, 3)
@@ -272,11 +272,16 @@ class SGNN(nn.Module):
         # O = O.repeat(Z.shape[0],1,1)
         # Z = torch.einsum('bij,bjk->bik', O, Z)
 
-
+        root_node = []
+        start_idx = 0
+        for end_idx in num_nodes_cum:
+            root_node.extend([start_idx] * (end_idx - start_idx))
+            start_idx = end_idx
+        root_node = torch.tensor(root_node).to(Z0.device)
 
         u = self.embedding_u(Z)
         mat = construct_3d_basis_from_1_vectors(u[..., 0])  # [2,3,3]
-        f_p = torch.einsum('bij,bjk->bik', mat.transpose(-1,-2), Z0)  # [N, 3, 32]
+        f_p = torch.einsum('bij,bjk->bik', mat[root_node].transpose(-1,-2), Z0)  # [N, 3, 32]
         f_p = f_p.transpose(-1, -2)
         f_p = f_p.reshape(f_p.shape[0], -1)  # [N, 3*32]
         # F_norm = torch.linalg.norm(f_p, axis=-1, keepdims=True) + 1.0

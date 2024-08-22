@@ -159,7 +159,7 @@ class Transform2ActPolicy(Policy):
             # x = obs
             if self.frame_gnn is not None:
                 # self.frame_gnn.change_morphology(edges, num_nodes)
-                x = self.frame_gnn(x, edges)
+                x = self.frame_gnn(x, edges, num_nodes_cum_control)
 
             if self.control_pre_mlp is not None:
                 x = self.control_pre_mlp(x)
