@@ -218,7 +218,7 @@ class SGNN(nn.Module):
         self.embedding_in = nn.Linear(self.attr_fixed_dim+self.attr_design_dim+self.state_dim-self.z_num*3, msg_dim)
         self.embedding_z = nn.Linear(self.z_num, self.z_dim, bias=False)
         self.embedding_u = nn.Linear(self.z_dim, 1, bias=False)
-        self.embedding_out = BaseMLP(input_dim=msg_dim+self.z_num*3,
+        self.embedding_out = BaseMLP(input_dim=msg_dim,#+self.z_num*3,
                            hidden_dim=msg_dim,
                            output_dim=self.attr_fixed_dim+self.attr_design_dim+self.state_dim,
                            activation=activation,
@@ -254,13 +254,13 @@ class SGNN(nn.Module):
 
         # f_p = self.embedding_f(torch.transpose(f_p, 0, -1))
         # f_p = torch.transpose(f_p, 0, -1)
-        u = self.embedding_u(Z)
-        mat = construct_3d_basis_from_1_vectors(u[..., 0])  # [2,3,3]
-        f_p = torch.einsum('bij,bjk->bik', mat.transpose(-1,-2), Z0)  # [N, 3, 32]
-        f_p = f_p.transpose(-1, -2)
-        f_p = f_p.reshape(f_p.shape[0], -1)  # [N, 3*32]
-        # F_norm = torch.linalg.norm(f_p, axis=-1, keepdims=True) + 1.0
-        h = torch.cat((f_p, h), axis=-1)  # [3*N=32*3+H] #s_o_[self.obj_id]
+        # u = self.embedding_u(Z)
+        # mat = construct_3d_basis_from_1_vectors(u[..., 0])  # [2,3,3]
+        # f_p = torch.einsum('bij,bjk->bik', mat.transpose(-1,-2), Z0)  # [N, 3, 32]
+        # f_p = f_p.transpose(-1, -2)
+        # f_p = f_p.reshape(f_p.shape[0], -1)  # [N, 3*32]
+        # # F_norm = torch.linalg.norm(f_p, axis=-1, keepdims=True) + 1.0
+        # h = torch.cat((f_p, h), axis=-1)  # [3*N=32*3+H] #s_o_[self.obj_id]
 
 
         h = self.embedding_out(h)

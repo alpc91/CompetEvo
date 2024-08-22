@@ -155,10 +155,10 @@ class Transform2ActPolicy(Policy):
         # execution
         if len(x_dict['execution']) > 0:
             obs, edges, _, num_nodes, num_nodes_cum_control, body_ind = self.batch_data(x_dict['execution'])
-            # x = self.control_norm(obs)
+            x = self.control_norm(obs)
             if self.frame_gnn is not None:
                 # self.frame_gnn.change_morphology(edges, num_nodes)
-                x = self.frame_gnn(obs, edges)
+                x = self.frame_gnn(x, edges)
 
             if self.control_pre_mlp is not None:
                 x = self.control_pre_mlp(x)
