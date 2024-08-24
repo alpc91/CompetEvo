@@ -167,6 +167,7 @@ class MultiEvoAgentEnv(MujocoEnv):
             init_pos, 
             ini_euler, 
             rgb, 
+            symmetric,
             **kwargs
             ):
         
@@ -176,7 +177,7 @@ class MultiEvoAgentEnv(MujocoEnv):
 
         self._env_xml_str = create_multiagent_xml_str(
             world_xml_path, all_agent_xml_strs, agent_scopes,
-            ini_pos=init_pos, ini_euler=ini_euler, rgb=rgb, symmetric=self.cfg.symmetric
+            ini_pos=init_pos, ini_euler=ini_euler, rgb=rgb, symmetric=symmetric
         )
         # print(self._env_xml_str)
         self.env_scene = MultiEvoAgentScene(self._env_xml_str, self.n_agents, **kwargs,)
@@ -310,7 +311,7 @@ class MultiEvoAgentEnv(MujocoEnv):
                 # self.ini_pos = [(self.np_random.uniform(low=-2, high=2), self.np_random.uniform(low=-2, high=2),self.ini_pos[0][2])] 
                 
                 self.load_tmp_mujoco_env(self.world_xml_path, cur_xml_strs, \
-                                     self.agent_scopes, self.ini_pos, self.ini_euler, self.rgb, **self.kwargs)
+                                     self.agent_scopes, self.ini_pos, self.ini_euler, self.rgb, self.symmetric, **self.kwargs)
                 # print(self._env_xml_str)
             except:
                 print("Warning: Errors occur when loading xml files.")
@@ -351,7 +352,7 @@ class MultiEvoAgentEnv(MujocoEnv):
                 # self.ini_pos = [(self.np_random.uniform(low=-2, high=2), self.np_random.uniform(low=-2, high=2),self.ini_pos[0][2])] 
                 
                 self.load_tmp_mujoco_env(self.world_xml_path, cur_xml_strs, \
-                                     self.agent_scopes, self.ini_pos, self.ini_euler, self.rgb, **self.kwargs)
+                                     self.agent_scopes, self.ini_pos, self.ini_euler, self.rgb, self.symmetric, **self.kwargs)
                 # print(self._env_xml_str)
             except:
                 print("Warning: Errors occur when loading xml files.")
@@ -394,29 +395,30 @@ class MultiEvoAgentEnv(MujocoEnv):
     def _seed(self, seed=None):
         return self.env_scene._seed(seed)
 
-    def _reset(self):
+    def _reset(self, **kwargs):
         self.cur_t = 0
         self._elapsed_steps = 0
         self.env_scene.reset()
-        self.reset_model()
+        self.reset_model(**kwargs)
         # reset agent position
         for i in range(self.n_agents):
             self.agents[i].set_xyz((None,None,None))
         ob = self._get_obs()
         return ob, {}
     
-    def reset(self):
+    def reset(self, **kwargs):
         if self.agents is not None:
             del self.agents
         if hasattr(self, "env_scene"):
             self.env_scene.close()
             del self.env_scene
         self.stage = 'skeleton_transform'
+        self.symmetric = kwargs['symmetric']
 
         # reload from init files, to avoid multiprocessing w/r issue
         self.setup_agents(self.cfg, self.agent_names, self.agent_map, self.agent_args)
         self.reload_init_mujoco_env()
-        return self._reset()
+        return self._reset(**kwargs)
 
     def set_state(self, qpos, qvel):
         self.env_scene.set_state(qpos, qvel)
@@ -428,8 +430,8 @@ class MultiEvoAgentEnv(MujocoEnv):
     def state_vector(self):
         return self.env_scene.state_vector()
     
-    def reset_model(self):
+    def reset_model(self, **kwargs):
         _ = self.env_scene.reset()
         for i in range(self.n_agents):
-            self.agents[i].reset_agent()
+            self.agents[i].reset_agent(**kwargs)
         return self._get_obs(), {}

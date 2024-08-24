@@ -163,7 +163,11 @@ class EvoAntTurn(Ant):
             # print("setp——reached_goal")
             reward += 1000
             goal_pos_r = np.random.uniform(3, 4)
-            goal_pos_theta = np.random.uniform(0, 2*np.pi)
+            if self.symmetric:
+                goal_pos_theta = np.random.uniform(0, 2*np.pi)
+            else:
+                goal_pos_theta = 0
+                xposafter[1] = 0
             goal = np.array([goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0])
             goal[:2] += xposafter
             # print("before")
@@ -216,12 +220,15 @@ class EvoAntTurn(Ant):
         #     return True
         # return False
 
-    def reset_agent(self):
+    def reset_agent(self,**kwargs):
         goal_pos_r = np.random.uniform(3, 4)
-        goal_pos_theta = np.random.uniform(0, 2*np.pi)
+        if 'symmetric' in kwargs and kwargs['symmetric']:
+            goal_pos_theta = np.random.uniform(0, 2*np.pi)
+            self.symmetric = True
+        else:
+            goal_pos_theta = 0
+            self.symmetric = False
         goal = np.array([goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), 0])
-        # goal = np.array([5,5,0])
-        # self.env.data.geom_xpos[1] = goal
         self.set_goal(goal)
         # pass
         # xpos = self.get_qpos()[0]

@@ -1,4 +1,4 @@
-env_name: turn-to-goal-evoant-v0
+env_name: turn-to-goal-evoant-v2
 runner_type: multi-evo-agent-runner
 
 agent_specs:
@@ -38,7 +38,7 @@ evo_policy_specs:
   attr_log_std: -2.3
   fix_control_std: false
   fix_attr_std: false
-  egnn: True
+  # egnn: True
 policy_optimizer: 'Adam'
 policy_lr: 5.e-5
 policy_momentum: 0.0
@@ -53,7 +53,7 @@ evo_value_specs:
     hdims: [64, 64, 64]
     aggr: add
     bias: true
-  egnn: True
+  # egnn: True
 value_optimizer: 'Adam'
 value_lr: 3.e-4
 value_momentum: 0.0
@@ -122,4 +122,4 @@ use_exploration_curriculum: False
 termination_epoch: 500
 use_parse_reward: False
 
-symmetric: True
+symmetric: False

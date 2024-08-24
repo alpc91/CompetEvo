@@ -109,12 +109,12 @@ def create_multiagent_xml_str(
             oripos = list(map(float, agent_body.get('pos').strip().split(" ")))
             # keep original y and z coordinates
 
-            if symmetric and n_agents>1:
-                goal_pos_r = np.random.uniform(1, 4)
-                goal_pos_theta = np.random.uniform(0, 2*np.pi)
-                pos =list((goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), ini_pos[i][2]))
-            else:
-                pos = list(ini_pos[i])
+            # if symmetric and n_agents>1:
+            #     goal_pos_r = np.random.uniform(1, 4)
+            #     goal_pos_theta = np.random.uniform(0, 2*np.pi)
+            #     pos =list((goal_pos_r * np.cos(goal_pos_theta), goal_pos_r * np.sin(goal_pos_theta), ini_pos[i][2]))
+            # else:
+            pos = list(ini_pos[i])
 
             
             # pos[1] = oripos[1]

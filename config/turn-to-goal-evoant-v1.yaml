@@ -119,7 +119,7 @@ use_opponent_sample: False
 delta: 0.
 
 use_exploration_curriculum: False
-termination_epoch: 1000
+termination_epoch: 500
 use_parse_reward: False
 
 symmetric: True

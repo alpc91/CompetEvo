@@ -34,9 +34,11 @@ def main():
     parser.add_argument('--num_threads', type=int, default=1)
     parser.add_argument('--ckpt_dir', type=str, default=None)
     parser.add_argument('--ckpt', type=str, default='0')
+    parser.add_argument('--seed', type=int, default=0)
     args = parser.parse_args()
     # Load config file
     cfg = Config(args.cfg_file)
+    cfg.seed = args.seed
 
     # ----------------------------------------------------------------------------#
     # Define logger and create dirs

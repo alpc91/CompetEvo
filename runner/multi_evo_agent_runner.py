@@ -308,7 +308,7 @@ class MultiEvoAgentRunner(BaseRunner):
                 #     ego_model_cp = pickle.load(f)
                 #     samplers[idx].load_ckpt(ego_model_cp)
 
-            states, info = self.env.reset()
+            states, info = self.env.reset(symmetric=eval or self.cfg.symmetric)
             # normalize states
             for i, sampler in samplers.items():
                 if sampler.running_state is not None:
@@ -603,7 +603,7 @@ class MultiEvoAgentRunner(BaseRunner):
         
         for _ in range(num_episode):
             episode_reward = [0 for _ in self.learners]
-            states, info = self.env.reset()
+            states, info = self.env.reset(symmetric=True)
             # normalize states
             for i, learner in self.learners.items():
                 if learner.running_state is not None:
