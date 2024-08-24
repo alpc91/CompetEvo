@@ -125,11 +125,11 @@ def create_multiagent_xml_str(
             orieuler = list(map(float, agent_body.get('euler').strip().split(" ")))
             # keep original y and z coordinates
 
-            if symmetric:
-                yaw = np.random.uniform(low=-np.pi, high=np.pi)/np.pi*180
-                euler = list((0, 0, yaw))
-            else:
-                euler = list(ini_euler[i])
+            # if symmetric:
+            yaw = np.random.uniform(low=-np.pi, high=np.pi)/np.pi*180
+            euler = list((0, 0, yaw))
+            # else:
+            #     euler = list(ini_euler[i])
 
             # euler[1] = orieuler[1]
             # euler[2] = orieuler[2]
