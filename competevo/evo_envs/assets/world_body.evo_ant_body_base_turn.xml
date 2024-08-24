@@ -33,22 +33,22 @@
       <geom pos="0 0 0" size="0.25" type="sphere" rgba="0 1 0 0.5" />
     </body>
   <body name="agent0/0" pos="0 0 0.75" euler="0 0 0">
-      <geom pos="0 0 0" size="0.25" type="sphere" class="agent0" name="agent0/anon787846415" />
+      <geom pos="0 0 0" size="0.25" type="sphere" class="agent0" name="agent0/anon2546248240" />
       <joint armature="0" damping="0" limited="false" margin="0.01" name="agent0/root" pos="0 0 0" range="-30 30" type="free" />
       <body name="agent0/1" pos="0 0 0">
-          <geom fromto="0.0 0.0 0.0 0.4 0.4 0.0" size="0.08" type="capsule" class="agent0" name="agent0/anon2563451925" />
+          <geom fromto="0.0 0.0 0.0 0.4 0.4 0.0" size="0.08" type="capsule" class="agent0" name="agent0/anon7921061057" />
           <joint axis="-1 1 0" name="agent0/1_joint" pos="0.0 0.0 0.0" range="-30 30" type="hinge" />
       </body>
       <body name="agent0/2" pos="0 0 0">
-          <geom fromto="0.0 0.0 0.0 -0.4 0.4 0.0" size="0.08" type="capsule" class="agent0" name="agent0/anon9019323607" />
+          <geom fromto="0.0 0.0 0.0 -0.4 0.4 0.0" size="0.08" type="capsule" class="agent0" name="agent0/anon6973152980" />
           <joint axis="-1 -1 0" name="agent0/2_joint" pos="0.0 0.0 0.0" range="-30 30" type="hinge" />
       </body>
       <body name="agent0/3" pos="0 0 0">
-          <geom fromto="0.0 0.0 0.0 -0.4 -0.4 0.0" size="0.08" type="capsule" class="agent0" name="agent0/anon4537253173" />
+          <geom fromto="0.0 0.0 0.0 -0.4 -0.4 0.0" size="0.08" type="capsule" class="agent0" name="agent0/anon5945874163" />
           <joint axis="1 -1 0" name="agent0/3_joint" pos="0.0 0.0 0.0" range="-30 30" type="hinge" />
       </body>
       <body name="agent0/4" pos="0 0 0">
-          <geom fromto="0.0 0.0 0.0 0.4 -0.4 0.0" size="0.08" type="capsule" class="agent0" name="agent0/anon7395928408" />
+          <geom fromto="0.0 0.0 0.0 0.4 -0.4 0.0" size="0.08" type="capsule" class="agent0" name="agent0/anon1277901400" />
           <joint axis="1 1 0" name="agent0/4_joint" pos="0.0 0.0 0.0" range="-30 30" type="hinge" />
       </body>
     </body>

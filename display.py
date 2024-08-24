@@ -29,11 +29,13 @@ def main():
                         type=str)
     parser.add_argument('--ckpt_dir', type=str, default=None)
     parser.add_argument('--ckpt', type=str, default='best')
+    parser.add_argument('--symmetric', type=str2bool, default=True)
     args = parser.parse_args()
     # Load config file
     args.run_dir = os.path.split(args.cfg)[0] + '/'
     cfg_file = args.cfg
     cfg = Config(cfg_file)
+    cfg.symmetric = args.symmetric
 
     # ----------------------------------------------------------------------------#
     # Define logger and create dirs

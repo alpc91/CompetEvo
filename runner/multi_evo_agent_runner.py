@@ -603,7 +603,7 @@ class MultiEvoAgentRunner(BaseRunner):
         
         for _ in range(num_episode):
             episode_reward = [0 for _ in self.learners]
-            states, info = self.env.reset(symmetric=True)
+            states, info = self.env.reset(symmetric=self.cfg.symmetric)
             # normalize states
             for i, learner in self.learners.items():
                 if learner.running_state is not None:
