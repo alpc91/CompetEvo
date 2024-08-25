@@ -2,7 +2,7 @@ import os
 import subprocess
 
 
-sds = [8,24]
+sds = [1,8,24]
 gpu_index = 1
 
 for sd in sds:
