@@ -55,7 +55,7 @@ def main():
     logger.info('Type of current running: Training')
     logger.set_file_handler()
     # Save the config file
-    cfg.save_config(logger.run_dir)
+    cfg.save_config(cfg, logger.run_dir)
 
     # ----------------------------------------------------------------------------#
     # Set torch and random seed

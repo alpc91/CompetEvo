@@ -88,10 +88,10 @@ class Config:
         self.robot_param_scale = cfg.get('robot_param_scale', 0.1)
         self.robot_cfg = cfg.get('robot', dict())
 
-    def save_config(self, directory_path):
+    def save_config(self, cfg, directory_path):
         # Create the YAML file path
         file_path = os.path.join(directory_path, 'config.yml')
         # Write the configuration data to the YAML file
         with open(file_path, 'w') as f:
-            yaml.dump(self.cfg, f)
+            yaml.dump(cfg, f)
         print(f"Config file is saved at {file_path}")
